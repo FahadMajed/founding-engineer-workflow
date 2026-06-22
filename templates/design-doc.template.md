@@ -127,7 +127,7 @@ List:
 
 ## Milestones
 
-List major tasks with calendar dates (manage through your task mynamenet software). For each:
+List major tasks with calendar dates (manage through your task-tracking tool). For each:
 
 - Name
 - Description

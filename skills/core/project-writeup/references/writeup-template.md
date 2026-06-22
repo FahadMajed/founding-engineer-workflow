@@ -1,5 +1,7 @@
 # Write-Up Template
 
+State facts. No narrative framing. No dramatic adjectives. No "the pain / the hunt / the pivot" arc.
+
 ## Feature Write-Up Template
 
 ```markdown
@@ -7,34 +9,30 @@
 
 _Date: [Month Year]_
 
-## The Problem
+## Problem
 
-[2-3 paragraphs. Set up the pain with specifics.]
+[2-3 paragraphs. State what was wrong with concrete numbers where possible.]
 
-"Users spent hours daily reconciling data" not "It was inefficient."
+"Operators spent ~30 min/day reconciling orders across three external systems." Not "It was painful."
 
 ## What We Built
 
-[One paragraph. What would you say at standup?]
+[One paragraph. Plain description, no marketing tone.]
 
-## How We Got There
+## Approach
 
-[The journey, not step-by-step code. Include dead ends.]
+[How it works. Include alternatives considered only if the choice was non-obvious — and only state the reason, not the deliberation.]
 
-### First Approach: [Name]
+### [Alternative considered, if any]
 
-[What we tried, why it didn't work]
+[Approach name. Why it was not used.]
 
-### The Pivot
-
-[What changed our thinking]
-
-## The Architecture
+## Architecture
 
 [Plain language + ASCII diagram. Link to design doc for details.]
 
 ┌──────────┐    ┌───────┐    ┌─────────┐
-│  Input   │───>│ Queue │───>│ Handler │
+│ Webhook  │───>│ Queue │───>│ Handler │
 └──────────┘    └───────┘    └─────────┘
                                   │
                                   v
@@ -46,17 +44,16 @@ _Date: [Month Year]_
 
 ### [Bug Title]
 
-**Symptoms:** [What we observed]
-**Hunt:** [How we debugged it]
-**Root Cause:** [Why it happened]
-**Fix:** [What we changed]
-**Prevention:** [How to avoid in future]
+**Symptom:** [What was observed. Concrete.]
+**Root Cause:** [Why it happened.]
+**Fix:** [What changed. File / function reference if useful.]
+**Prevention:** [Test, monitor, pattern that prevents recurrence.]
 
-## What I Learned
+## Lessons
 
-### [Lesson 1]: [Title]
+### [Lesson Title]
 
-[Specific insight with context. Make it transferable.]
+[Specific, transferable insight. State the rule and the reason. No reflection on feelings.]
 
 ## Related
 
@@ -77,11 +74,11 @@ _Date: [When it happened]_
 
 ## Impact
 
-[What broke, for how long, who was affected]
+[What broke, for how long, who was affected. Numbers.]
 
 ## Detection
 
-[How we noticed - alerts? customer report? accident?]
+[How it was noticed - alert, customer report, internal check.]
 
 ## Timeline
 
@@ -89,52 +86,46 @@ _Date: [When it happened]_
 - **[Time]**: [Event]
 - **[Time]**: Resolution
 
-## Investigation
-
-[The debugging journey. What did logs show? What was misleading?]
-
 ## Root Cause
 
-[The actual technical reason, with code context]
+[Technical reason, with code/config reference.]
 
 ## Fix
 
-[What we shipped]
+[What shipped.]
 
 ## Prevention
 
-[What we changed to prevent recurrence - tests, monitoring, patterns]
+[Tests, monitors, patterns added.]
 
 ## Lessons
 
-[Transferable insights]
+[Transferable insights. Specific.]
 ```
 
 ---
 
 ## Section Tips
 
-### "The Problem"
+### "Problem"
 
-- Start with user pain, not technical debt
-- Include numbers if you have them (time wasted, error rates, support tickets)
-- Don't over-explain. If context is complex, link to design doc overview
+- Start with what was wrong, in numbers if available (time, error rate, ticket count).
+- No user-pain monologue. State the condition; the reader infers the cost.
+- Link to design doc for deeper context instead of restating it.
 
-### "How We Got There"
+### "Approach"
 
-- This is where the story lives
-- Dead ends are often more instructive than the solution
-- Quote memorable decisions or debates
+- Describe the chosen design. State why for the non-obvious parts.
+- Mention alternatives only if knowing they were rejected helps a future reader. Do not narrate the deliberation.
 
 ### "Bugs & Gotchas"
 
-- Be specific: error messages, edge cases, timing
-- The debugging journey matters, not just the fix
-- Mark severity: "production downtime" vs "caught in staging"
+- Symptom, root cause, fix, prevention. Four lines is enough for most.
+- Include error messages, edge cases, affected scope.
+- Severity if relevant: "production downtime 14 min", "caught in staging".
 
-### "What I Learned"
+### "Lessons"
 
-- Think: if I joined a new team building something similar, what would help?
-- Think: what would help someone building something similar?
-- Include "soft" lessons too: communication, scope creep, estimation
-- Be honest about mistakes
+- One rule per lesson. Specific enough that a reader can apply it.
+- Include the reason behind the rule.
+- No generic advice ("write tests", "handle errors"). If a lesson would apply to any project, drop it.

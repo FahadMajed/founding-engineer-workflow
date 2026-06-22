@@ -5,21 +5,21 @@ description: Write tests from existing scenarios and implementation. Use after /
 
 # Write Tests
 
-Converts test scenarios into actual tests. Runs after `/plan-tests` (creates scenarios) and `/build-feature` (implements code).
+Converts test scenarios into actual E2E tests. Runs after `/plan-tests` (creates scenarios) and `/build-feature` (implements code).
 
 ## Inputs
 
-1. **Test scenarios doc** from test scenarios location
+1. **Test scenarios doc** from `docs/for_ai/test_scenarios/`
 2. **Implemented feature** location (service, controller, module)
 
 ## Workflow
 
-1. Read test scenarios doc
-2. Read implemented code (service methods, controller endpoints, entities)
-3. Detect gaps (see below)
-4. Write test file following patterns in `references/test-patterns.template.md`
-5. Run tests
-6. Report: pass/fail count, any gaps found
+1. Read the test scenarios doc.
+2. Read the implemented code (service methods, controller endpoints, entities).
+3. Detect gaps (see below).
+4. Write the test file following patterns in [references/test-patterns.md](references/test-patterns.md).
+5. Run tests.
+6. Report: pass/fail count, any gaps found.
 
 ## Gap Detection
 
@@ -31,7 +31,7 @@ Compare scenarios against implementation. Flag:
 | **Missing test coverage**  | Code has error handling not covered by any scenario                                              |
 | **Behavior mismatch**      | Scenario expects order marked `failed` when inventory insufficient, but implementation marks it `pending` |
 
-Report gaps before writing tests. Ask: proceed anyway, or update scenarios/implementation first?
+Report gaps before writing tests. Ask: proceed anyway, or update scenarios/implementation first? Don't silently make the test match the code.
 
 ## Mocking Rules
 
@@ -73,8 +73,8 @@ test('should return existing order without creating duplicate', async () => {
 
 Before writing, check existing test files for overlap. Merge when:
 - Tests share setup AND action
-- One test is subset of another
-- Multiple aspects can verify in single test
+- One test is a subset of another
+- Multiple aspects can verify in a single test
 
 ## Output
 
@@ -86,7 +86,7 @@ Before writing, check existing test files for overlap. Merge when:
 
 After tests pass, spawn the `code-reviewer` agent to review the implementation + test code. It will check:
 - Bugs and logic errors
-- Pattern violations (against CLAUDE.md and coding-patterns)
+- Pattern violations (against CLAUDE.md and the references)
 - Code quality issues
 
 Address critical/important issues before considering the feature ready for PR.

@@ -1,134 +1,114 @@
 # Feature Development Lifecycle with AI
 
-## The Cycle
+The level of process scales with the size of the work. Three entry points, one set of underlying skills.
+
+| Size                       | Entry point                | Design                      | Tests                | PRs |
+| -------------------------- | -------------------------- | --------------------------- | -------------------- | --- |
+| Big (days, API + UI)       | `/sdlc`                    | Full design doc, section-by-section | plan + write (2 agents) | 2   |
+| Medium (hours, API + UI)   | `/adhoc-fullstack-feature` | 3-section short design doc  | plan + write (2 agents) | 2   |
+| Small (hours, backend)     | `/adhoc-feature`           | None                        | plan + write (2 agents) | 1   |
+
+It's collaborative, not autonomous. The agent moves fast between phases; you think with it at the boundaries. The goal is to ship fast *and* keep the code maintainable — because maintainable code is what keeps you fast.
+
+---
+
+## The Full Lifecycle (`/sdlc`)
 
 ```
-[UX Discovery → Demo → Team Feedback (if UI)] → Design Doc → Analyze → [Plan Tests ∥ Build] → Write Tests → Review → Staging → Prod → Document
+[UX Discovery → Demo] → Design Doc → [Plan Tests ∥ Build] → Write Tests + Verify → Review → Ship → Document
 ```
 
-## Phases
+Every phase ends at a **gate**: present, think together, adjust, then continue. Gates aren't rubber-stamps — they're where your judgment shapes the output: redirect the backend design, critique or add a test scenario, raise the bar on implementation quality. The agent does the work between gates; you steer at each one. Never blow through a gate on assumption.
 
-### 0. UX Discovery + Demo (If Feature Has UI)
-
-Before backend design, if the feature has a user interface:
+### 0. UX Discovery + Demo (if the feature has UI)
 
 | Step          | Skill             | Output                                     |
 | ------------- | ----------------- | ------------------------------------------ |
-| UX Discovery  | `/ux-discovery`   | `docs/discovery/{feature}-ux-discovery.md` |
-| Build Demo    | '/frontend-build' | Working UI with mock data                  |
-| Team Feedback | Manual            | Comments, questions, adjustments           |
-| Refine        | Manual            | Updated discovery doc if needed            |
+| UX Discovery  | `/ux-discovery`   | `docs/discovery/{feature}/` tree           |
+| Build Demo    | `/frontend-build` | Working UI with mock data                  |
+| Feedback      | Manual            | Comments, questions, adjustments           |
 
-**Purpose:**
+**Purpose:** see real UI instead of abstract specs; let the actual data needs surface the API shape; catch UX issues before backend work begins. Mock data, no API dependencies, fast iteration.
 
-- Team sees real UI, not abstract specs
-- API shapes become clear from actual data needs
-- Catch UX issues before backend work begins
-- Faster iteration — mock data, no API dependencies
+→ **GATE (UX), GATE (Frontend).**
 
----
+### 1. Design Doc
 
-### 0.5. Write Design Doc (Manual)
+Written section by section, not freehand. The method lives in `DESIGN_DOC_METHOD.md`; the structure in `design-doc.template.md`.
 
-After demo alignment, write the backend design doc. This is a thinking exercise.
+- **Narrative** — Overview, Existing Solution, Use Cases + Business Rules, Alternatives, Open Questions. Port and sharpen from the discovery. → **GATE.**
+- **Technical** — each its own skill, each with its own fresh-eyes review:
+  - `/design-schema` — entities, keys, indices, constraints, migrations
+  - `/design-api` — endpoints, request/response shapes, domain errors
+  - `/design-components` — modules, service interfaces, data flow, invariants
+- **Tail** — Implementation Details, Assumptions, Milestones, Glossary.
 
-**Inputs:**
+Each technical section runs the same loop: load context → draft with a one-line *why* per element → iterate with you → **agnostic review** by a fresh agent (`/analyze-design` + a simplicity/fit pass) → write it in.
 
-- UX discovery doc (user flows, information hierarchy, edge cases)
-- Working demo (actual data shapes, what the UI needs)
-- Team feedback (adjustments, gaps, questions answered)
-- Domain knowledge (how the business actually works)
+→ **GATE (Design doc).**
 
-**Thought process:**
+### 2. Plan Tests ∥ Build
 
-| Step                | What you're doing                               | Where it goes     |
-| ------------------- | ----------------------------------------------- | ----------------- |
-| Define scope        | What's in/out? What are we NOT building?        | Overview          |
-| Extract use cases   | What does the user do? Main flow + extensions   | Use Cases         |
-| Make rules explicit | Status transitions, validation, formulas, rules | Business Rules    |
-| Design data model   | Entities, fields, indices, migrations           | Data Design       |
-| Design APIs         | Endpoints, request/response shapes, errors      | API Design        |
-| Map dependencies    | Services, responsibilities, patterns to follow  | Components Design |
+Spawn a separate agent to plan tests from the design doc while you build. The implementer is biased toward the code they just wrote; a planner that never saw the implementation catches the blind spots.
 
----
+| Track A (`/plan-tests`) | Track B (`/build-feature`)        |
+| ----------------------- | --------------------------------- |
+| Behavior scenarios      | Implementation + self-review sweep |
+| From the design doc     | From the design doc               |
 
-### 1. Analyze Design
+`/build-feature` reads its references in full, walks the new-module scoping checklist, builds, then runs its own review sweep (references → simplifier → reviewer → jsdoc).
 
-**Skill:** `/analyze-design`
+→ **GATE (Built):** build + lint green.
 
-Find gaps before coding: edge cases, error scenarios, unclear business rules. Fix critical gaps before proceeding.
+### 3. Write Tests + Verify
 
----
-
-### 2. Plan Tests + Build (Parallel)
-
-Run in **separate worktrees with separate Claude sessions** - prevents bias, each works purely from design.
-
-```bash
-./scripts/start-worktrees.sh feature-name
-# Opens editor + spawns two Claude sessions
-```
-
-| Track A         | Track B          |
-| --------------- | ---------------- |
-| `/plan-tests`   | `/build-feature` |
-| Test scenarios  | Implementation   |
-| From design doc | From design doc  |
-
-Why parallel: Blind spots in one track get caught by the other.
-
----
-
-### 3. Write Tests (Feedback Loop)
-
-**Skill:** `/write-tests`
-
-Merge impl into tests branch, then reconcile:
-
-- Convert scenarios to real tests
-- Gaps in scenarios → add tests for cases impl handles
-- Gaps in impl → fix code for cases scenarios expect
-
-```bash
-./scripts/merge-worktrees.sh feature-name
-# Then:
-claude → /write-tests
-```
-
----
+- **`/write-tests`** (fresh agent) converts scenarios into real tests and reports gaps:
+  - Gap in scenarios → add tests for cases the implementation handles
+  - Gap in implementation → surface it; don't silently make the test match the code
+- **`/chrome-verify`** (frontend) walks the scenarios as user flows, screenshots each at the narrow breakpoint.
 
 ### 4. Review
 
-Create PR, run code review (AI or human), fix issues, iterate.
+Backend was reviewed inside `/build-feature`. Run the review sweep on the frontend changes. Security review for sensitive changes. Human review for final approval.
 
-Security review for sensitive changes.
+### 5. Ship
 
-Human review for final approval.
+Two repos → two cross-linked PRs (collapse to one if you're single-repo). Test critical paths. Deploy.
 
----
+### 6. Document (optional)
 
-### 5. Staging & Production
-
-Test in staging environment. Manual test critical paths.
-
-Deploy to production. Record demo if helpful.
+`/project-writeup` — a factual record of the problem, the build, the bugs, the lessons. Not a story.
 
 ---
 
-### 6. Document (Optional)
+## The Two Adhoc Tracks
 
-| Skill              | Purpose                    |
-| ------------------ | -------------------------- |
-| `/project-writeup` | Write the story, learnings |
+### `/adhoc-fullstack-feature` (medium, API + UI)
+
+UX-first across both repos with three hard checkpoints, so divergence is caught at the cheap stage:
+
+1. **UX** — `/ux-discovery-lite` + a throwaway HTML preview → sign-off before production UI.
+2. **Frontend** — a demo built on mock data → sign-off before backend design.
+3. **Backend design** — a 3-section short design doc (data, API, components) → sign-off before backend code.
+
+Then build → two-agent tests → wire the UI to the real API → visual verify → two PRs.
+
+### `/adhoc-feature` (small, backend)
+
+Skip the design doc; keep investigation, tests, and review. Understand → match existing patterns → implement → two-agent tests → review sweep → PR.
 
 ---
 
 ## Supporting Skills
 
-| Skill            | Purpose                       |
-| ---------------- | ----------------------------- |
-| `/local-testing` | Test endpoints with auto-auth |
-| `/debug-errors`  | Investigate production errors |
+| Skill            | Purpose                                              |
+| ---------------- | --------------------------------------------------- |
+| `/fix-bug`       | TDD: failing test first, then fix, then PR           |
+| `/observability` | Read-only prod triage → classify → fix or escalate   |
+| `/local-testing` | Test endpoints with auto-auth                        |
+| `/debug-errors`  | Investigate production errors                         |
+| `/ux-touch`      | Design a targeted addition to a shipped feature      |
+| `/design-critique` | Structured feedback on a UX concept or built UI    |
 
 ---
 
@@ -136,38 +116,14 @@ Deploy to production. Record demo if helpful.
 
 | Purpose          | Location                                   |
 | ---------------- | ------------------------------------------ |
+| Design method    | `docs/standards/DESIGN_DOC_METHOD.md`      |
 | Coding patterns  | `.claude/skills/build-feature/references/` |
 | Test patterns    | `.claude/skills/write-tests/references/`   |
 | Design docs      | `docs/design_docs/`                        |
 | Test scenarios   | `docs/for_ai/test_scenarios/`              |
-| Worktree scripts | `scripts/`                                 |
-
----
-
-## Worktree Scripts
-
-```bash
-# 1. Start (editor + two Claude sessions)
-./scripts/start-worktrees.sh feature-name
-
-# 2. Work in the two sessions - don't cross-pollinate
-
-# 3. Merge impl into tests
-./scripts/merge-worktrees.sh feature-name
-
-# 4. Write tests (fresh Claude session in tests dir)
-claude "/write-tests"
-
-# 5. Push and create PR
-git push -u origin feature/feature-name-tests
-gh pr create
-
-# 6. Cleanup after PR merged
-./scripts/end-worktrees.sh feature-name
-```
 
 ---
 
 ## Flexibility
 
-Phases aren't strict — go back and forth, run in parallel. Not all features need this level of process. Match effort to complexity.
+Nothing here is law. Phases aren't strict — go back and forth, collapse steps, run them in parallel. Not every feature needs this much process; match the effort to the complexity. Treat the skills and references as a starting point and bend them to how you actually work — the workflow should fit you, not the other way around.

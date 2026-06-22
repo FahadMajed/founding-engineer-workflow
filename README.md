@@ -1,6 +1,8 @@
 # Founding Engineer Workflow
 
-A feature development workflow for people who build, who think about problems before solutions, about user needs before technologies, about shipping fast while maintaining quality.
+A feature development workflow for people who build — who think about problems before solutions, user needs before technologies, and shipping fast without trading away quality.
+
+It's a set of Claude Code skills and supporting docs that take a feature from user problem → discovery → design → build → tests → review → ship, with the level of process matched to the size of the work.
 
 ## Who This Is For
 
@@ -14,106 +16,141 @@ This workflow assumes:
 
 **Not for:** Junior devs learning the basics, or orgs with strict role separation.
 
-## The Philosophy
+## What's Opinionated vs. What's Yours
 
-This isn't just about process — it's about a better way to build.
+This is one engineer's taste, extracted from a real product and stripped of its business.
 
-**Advantages of single-owner development:**
+- **The engineering references are concrete** — the backend patterns assume NestJS + TypeORM + Postgres + jest; the frontend assumes React + Tailwind + shadcn/ui. They're not fill-in-the-blank. Copy them as-is if you share the taste, adapt them if you don't.
+- **The business context is left blank on purpose** — product description, user personas, and domain rules are `{{PLACEHOLDERS}}` in the discovery skills. Nothing here makes you inherit someone else's domain. Fill in your own.
 
-1. **Velocity** — No handoffs, no tickets, no "waiting on design," no alignment meetings
-2. **One mind** — No translation loss. The person who understood the user problem writes the code
-3. **Ownership** — You built it, you own it. When it breaks, you know exactly where
-4. **Business understanding** — You're not implementing a spec. You understand _why_
-5. **Coherence** — Features built by one mind feel unified, not stitched together
+## The Workflow — match effort to size
 
-**Trade-offs to acknowledge:**
-
-- You trade specialist depth for generalist speed
-- Same brain = same blind spots
-- Doesn't scale past ~2 features in parallel
-
-## The Workflow
+Three entry points. Pick by how big the work is, not by habit.
 
 ```
-[UX Discovery → Demo] → Design Doc → Analyze → [Plan Tests ∥ Build] → Write Tests → Review → Ship → Document
+BIG feature (days, API + UI)        →  /sdlc
+   ux-discovery → frontend demo → full design doc
+   (narrative + design-schema ∥ design-api ∥ design-components)
+   → plan-tests ∥ build-feature → write-tests + chrome-verify
+   → review → two cross-linked PRs
+
+MEDIUM feature (hours, API + UI)    →  /adhoc-fullstack-feature
+   ux-discovery-lite + HTML preview → demo → short design doc
+   → build → two-agent tests → wire + visual verify → two PRs
+   (three hard checkpoints: UX, frontend, backend design)
+
+SMALL feature (hours, backend)      →  /adhoc-feature
+   understand → implement → two-agent tests → review → PR
 ```
+
+Supporting flows: **`/fix-bug`** (TDD bug fix), **`/observability`** (production triage), **`/project-writeup`** (document what you built).
+
+A few ideas run through all of it:
+
+- **You steer between phases.** The agent moves fast; you think with it at the gates — push back on the design, critique a test scenario, raise the bar on quality. The aim is fast *and* maintainable, because maintainable code is what keeps you fast.
+- **Design before code.** Big features get a real design doc, drafted section by section (schema, API, components), each with a fresh-eyes review before anything is built.
+- **Tests written by someone who didn't write the code.** `/plan-tests` and `/write-tests` run as two separate agents so coverage comes from the spec, not from the implementation's blind spots.
 
 ## Quick Start
 
-### 1. Copy skills to your project
+### 1. Copy the skills into your project
 
 ```bash
-cp -r skills/core/* your-project/.claude/skills/
-cp -r skills/frontend/* your-project/.claude/skills/  # if you have frontend
+cp -r skills/workflows/* your-project/.claude/skills/
+cp -r skills/core/*      your-project/.claude/skills/
+cp -r skills/frontend/*  your-project/.claude/skills/   # if you have a frontend
+# optional add-ons (rename .template.md → SKILL.md after filling them in):
+cp -r skills/optional/*  your-project/.claude/skills/
 ```
 
-### 2. Customize for your stack
+### 2. Install the shared docs
 
-Edit the reference files:
+```bash
+cp templates/DESIGN_DOC_METHOD.md  your-project/docs/standards/DESIGN_DOC_METHOD.md
+cp templates/design-doc.template.md your-project/docs/design_docs/TEMPLATE.md
+cp PHILOSOPHY.md                    your-project/docs/standards/   # your engineering principles
+```
 
-- `skills/build-feature/references/coding-patterns.template.md`
-- `skills/write-tests/references/test-patterns.template.md`
+### 3. Customize for your stack
 
-Replace `{{PLACEHOLDERS}}` with your patterns.
+- Edit `build-feature/references/*` to match your backend patterns (or keep them if you run NestJS).
+- Edit `frontend-build/reference/*` for your component system.
+- Fill in the `{{PLACEHOLDERS}}` (product, users, principles) in `ux-discovery` and `ux-discovery-lite`.
 
-### 3. Create your CLAUDE.md
+### 4. Create your CLAUDE.md
 
-Copy `templates/CLAUDE.md.template` to your project root as `CLAUDE.md`. Fill in your stack, commands, and rules.
+Copy `templates/CLAUDE.template.md` to your project root as `CLAUDE.md`. Fill in your stack, commands, and rules.
 
 ## Skills Reference
 
-### Core Skills
+### Workflow orchestrators
 
-| Skill                | Purpose                                                            |
-| -------------------- | ------------------------------------------------------------------ |
-| `/ux-discovery`      | Deep UX thinking before building. Outputs structured discovery doc |
-| `/ux-discovery-lite` | Lightweight version for small features                             |
-| `/analyze-design`    | Find gaps in design docs before implementation                     |
-| `/plan-tests`        | Create test scenarios from design (before code exists)             |
-| `/build-feature`     | Implement features following codebase patterns                     |
-| `/write-tests`       | Convert scenarios to tests, detect gaps                            |
-| `/project-writeup`   | Document the story, architecture, learnings                        |
+| Skill                      | Use when                                                        |
+| -------------------------- | --------------------------------------------------------------- |
+| `/sdlc`                    | A big fullstack feature — days of work, needs a real design doc |
+| `/adhoc-fullstack-feature` | A small feature spanning API + UI — hours, not days             |
+| `/adhoc-feature`           | A small backend feature — no design doc, single PR              |
 
-### Frontend Skills
+### Core (backend feature work)
 
-| Skill             | Purpose                               |
-| ----------------- | ------------------------------------- |
-| `/frontend-build` | Build polished UI from discovery docs |
-| `/chrome-verify`  | Visual verification with screenshots  |
+| Skill                | Purpose                                                              |
+| -------------------- | ------------------------------------------------------------------- |
+| `/ux-discovery`      | Deep UX thinking before building. Outputs a structured discovery doc |
+| `/ux-discovery-lite` | Lightweight discovery for small features                            |
+| `/analyze-design`    | Find gaps in a design doc before implementation                     |
+| `/design-schema`     | Draft the Data design section — entities, keys, indices, migrations  |
+| `/design-api`        | Draft the API design section — endpoints, shapes, domain errors      |
+| `/design-components` | Draft the Components design section — modules, interfaces, data flow |
+| `/plan-tests`        | Create behavior scenarios from the design (before code exists)       |
+| `/build-feature`     | Implement features following codebase patterns                      |
+| `/write-tests`       | Convert scenarios to tests, detect gaps                             |
+| `/fix-bug`           | TDD bug fix — failing test first, then fix, then PR                  |
+| `/project-writeup`   | Document the feature factually — what, why, bugs, lessons            |
 
-### Optional Skills (templates)
+### Frontend
 
-| Template              | Purpose                           |
-| --------------------- | --------------------------------- |
-| `local-testing`       | Test endpoints with auto-auth     |
-| `debug-errors`        | Investigate production errors     |
-| `task-management`     | Integrate with ClickUp/Linear/etc |
-| `resolve-pr-comments` | Address code review feedback      |
+| Skill              | Purpose                                              |
+| ------------------ | --------------------------------------------------- |
+| `/frontend-build`  | Build polished UI from discovery docs (shadcn-first) |
+| `/chrome-verify`   | Visual verification with headless screenshots        |
+| `/design-critique` | Structured design feedback on a concept or built UI  |
+| `/ux-touch`        | Design a targeted addition to a shipped feature      |
+
+### Optional (templates — fill in your tools, then rename to `SKILL.md`)
+
+| Template              | Purpose                                  |
+| --------------------- | ---------------------------------------- |
+| `local-testing`       | Test endpoints with auto-auth            |
+| `debug-errors`        | Investigate production errors            |
+| `observability`       | Read-only prod triage → classify → route |
+| `task-management`     | Integrate with ClickUp/Linear/etc        |
+| `resolve-pr-comments` | Address code review feedback             |
+
+## Agents
+
+The review steps lean on subagents in [`agents/`](agents/): `code-reviewer` (correctness), `qa-reviewer` (test coverage), `code-explorer` (find patterns to match), `security-reviewer` (sensitive changes). Copy them to `.claude/agents/`.
 
 ## File Structure
 
 ```
 your-project/
 ├── .claude/
-│   └── skills/
-│       ├── ux-discovery/
-│       ├── analyze-design/
-│       ├── plan-tests/
-│       ├── build-feature/
-│       │   └── references/coding-patterns.md  # Your patterns
-│       ├── write-tests/
-│       │   └── references/test-patterns.md    # Your patterns
-│       └── project-writeup/
+│   ├── skills/
+│   │   ├── sdlc/  adhoc-feature/  adhoc-fullstack-feature/
+│   │   ├── ux-discovery/  design-schema/  design-api/  design-components/
+│   │   ├── build-feature/references/      # your backend patterns
+│   │   ├── write-tests/references/        # your test patterns
+│   │   ├── frontend-build/reference/      # design-smell guides, shadcn-first
+│   │   └── ...
+│   └── agents/
 ├── docs/
-│   ├── discovery/           # UX discovery outputs
-│   ├── design_docs/         # Design documents
-│   └── for_ai/
-│       └── test_scenarios/  # Test scenario files
-├── scripts/
-│   ├── start-worktrees.sh
-│   ├── merge-worktrees.sh
-│   └── end-worktrees.sh
-└── CLAUDE.md                # Your project context
+│   ├── standards/
+│   │   ├── DESIGN_DOC_METHOD.md
+│   │   └── PHILOSOPHY.md
+│   ├── discovery/                         # UX discovery outputs
+│   ├── design_docs/                       # design docs + TEMPLATE.md
+│   └── for_ai/test_scenarios/             # test scenario files
+└── CLAUDE.md                              # your project context
 ```
 
 ## Related

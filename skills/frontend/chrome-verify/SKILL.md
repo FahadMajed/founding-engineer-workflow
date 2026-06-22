@@ -12,7 +12,9 @@ Two tools — pick based on need:
 | Verify pages look right (default) | Playwright library script | Low — just screenshots |
 | Interactive debugging / exploring | Playwright MCP tools      | High — use sparingly   |
 
-**Default to library scripts.** Only use MCP when you need a real-time see-think-act loop.
+**Default to library scripts.** Only use MCP when you need a real-time see-think-act loop (e.g. debugging why a dropdown doesn't open, testing a multi-step flow where you need to react to results).
+
+CRITICAL: if you're using the npm package, run inline Playwright via Bash — write the script to a scratch dir and run it with `node`.
 
 ## Project Details
 
@@ -21,9 +23,11 @@ Customize for your project:
 ```
 - Dev server: `{{YOUR_DEV_SERVER}}` (e.g., localhost:3000)
 - Check: `lsof -i :{{PORT}} -sTCP:LISTEN`
-- Login: {{YOUR_LOGIN_FLOW}}
-- Playwright installed as dev dep with Chromium
+- Login: {{YOUR_LOGIN_FLOW}} (auto-submit via URL params keeps scripts simple)
+- Playwright installed as a dev dep with Chromium. `import { chromium } from 'playwright'`
 ```
+
+**Ensure data is seeded.** Based on the API/data layer you're verifying, check the dev DB. If there isn't enough data to exercise the cases you need (empty, few, many, edge), it's your responsibility to seed it per scenario before screenshotting.
 
 ## What to Verify
 

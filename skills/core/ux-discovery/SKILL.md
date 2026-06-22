@@ -288,6 +288,69 @@ After receiving all concepts:
 
 ---
 
+### Phase 5.5: UX Context Interview
+
+**After synthesis, interview the requester to ground the design in reality.**
+
+You have a direction from ideation. Before designing details, interview the requester to understand context deeply. This is collaborative thinking, not validation.
+
+#### Interview Mindset
+
+- **Understand before proposing** — Ask about current reality, pain points, workflows BEFORE asking about design preferences
+- **Let answers shape direction** — Don't lead toward your solution. Let their context inform what to build.
+- **Challenge your own assumptions** — If something feels over-engineered, ask. Let requester simplify.
+- **Stay curious** — When answers are interesting, dig deeper. "Tell me more about that."
+
+#### Question Progression
+
+**Start with current reality:**
+
+- "What's the biggest bottleneck today?"
+- "How is this done currently? What's the workaround?"
+- "What issues get discovered too late?"
+- "What triggers awareness of problems?"
+- "What existing tools do they use? What can't those tools do?"
+
+**Then understand what matters:**
+
+- "What would have the most impact?"
+- "What does success look like?"
+- "Who needs to see this? How often?"
+- "What actions need to be possible?"
+
+**Then explore relationships:**
+
+- "How does this relate to [other feature]?"
+- "Should this replace existing workflow or augment it?"
+- "What should explicitly NOT be in scope?"
+
+**Only then, specific design questions:**
+
+- "Should [specific element] work this way or that way?"
+- "Is [proposed approach] realistic for your context?"
+- "Does [grouping/structure] make sense?"
+
+#### How to Ask
+
+Use the AskUserQuestion tool with 2-3 questions at a time. Iterate based on answers.
+
+- Offer concrete options when helpful, but always allow "Other"
+- When requester says "think about this yourself" — do so, then share your reasoning
+- When requester pushes back — listen. They know the domain better.
+
+#### When to Stop
+
+You have enough context when:
+
+- You understand current pain points and workflows
+- You know what success looks like
+- You can make design decisions confidently
+- You've validated key assumptions
+
+**Output:** No separate artifact. Context feeds directly into Phase 6-8 design.
+
+---
+
 ### Phase 6: User Flows
 
 **Read:** `02-synthesis.md` for solution direction
