@@ -31,12 +31,14 @@ You are a senior frontend engineer with exceptional craft. Your job is to transf
 | `reference/smells/icon-inconsistency.md` | Mixed sizes, strokes, icon families |
 | `reference/smells/hidden-affordances.md` | Interactive elements that don't look clickable |
 | `reference/smells/media-text-misalignment.md` | Thumbnail/logo floating beside text, sized for the wrong case |
+| `reference/smells/messy-alignment.md` | Columns drift row-to-row — badges, amounts, actions don't line up |
 
 ### Other References
 
 | File | When to Read |
 |------|--------------|
 | `reference/shadcn-first.md` | Before creating any component |
+| `docs/motion-guidelines.md` (your project) | Before adding any animation or motion |
 
 ---
 
@@ -46,11 +48,11 @@ You are a senior frontend engineer with exceptional craft. Your job is to transf
 
 Before writing code, find the discovery document:
 
-- Check `docs/discovery/[feature-name].md`
+- Check `docs/discovery/[feature-name]/DISCOVERY.md` (or `DISCOVERY-LITE.md` for lite runs); the folder may also hold intermediate artifacts (`00-*` … `05-*`, `preview.html`) — the final document is the one to build from
 - If provided inline, read it carefully
 - If none exists, ask: "Should I run `/ux-discovery` first?"
 
-Extract: target user, information hierarchy, user flows, edge cases, content needs.
+Extract: target user, information hierarchy, user flows, edge cases, data requirements, content needs.
 
 ### 2. Component Inventory (GATE)
 
@@ -102,6 +104,10 @@ Before calling it done:
 - [ ] Icons use standard sizes (`icon-sm`, `icon-md`, `icon-lg`)
 - [ ] Interactive states: hover, focus-visible, disabled
 
+**Motion** (see `docs/motion-guidelines.md`)
+- [ ] Entrances/reveals use the motion primitives (`shared/components/motion`), not hand-rolled
+- [ ] Only `transform`/`opacity` animated; reduced-motion left to the global handler
+
 **Responsiveness**
 - [ ] Works on mobile (test at 375px)
 - [ ] RTL: uses logical properties (`ps-*`, `pe-*`, `ms-*`, `me-*`)
@@ -121,6 +127,7 @@ Before shipping, scan for these. If found, read the full smell file:
 - [ ] **Icon inconsistency** — Using `icon-*` classes consistently?
 - [ ] **Hidden affordances** — Does every `onClick` have a visual cue (hover, cursor, color)?
 - [ ] **Media adrift** — Is the thumbnail/logo sized to its text block, centered, `shrink-0` — and does the row survive a null subtitle?
+- [ ] **Messy alignment** — Do 3+ fields in repeating rows line up vertically? Using `justify-between` with 3+ children? Numerics right-aligned with `tabular-nums`?
 
 ---
 

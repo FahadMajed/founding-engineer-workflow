@@ -15,12 +15,19 @@ It's collaborative, not autonomous. The agent moves fast between phases; you thi
 ## The Full Lifecycle (`/sdlc`)
 
 ```
-[UX Discovery → Demo] → Design Doc → [Plan Tests ∥ Build] → Write Tests + Verify → Review → Ship → Document
+Proposal → [UX Discovery → Demo] → Design Doc → Plan Tests ∥ Build+Test+Ship (per slice)
+→ Wire + Verify → Ship Frontend → Register the bet
 ```
 
 Every phase ends at a **gate**: present, think together, adjust, then continue. Gates aren't rubber-stamps — they're where your judgment shapes the output: redirect the backend design, critique or add a test scenario, raise the bar on implementation quality. The agent does the work between gates; you steer at each one. Never blow through a gate on assumption.
 
-### 0. UX Discovery + Demo (if the feature has UI)
+**Appetite is a circuit breaker.** At every gate, state elapsed effort against the appetite set at intake. Past appetite the gate becomes a mandatory shrink-or-stop decision, recorded — never a silent continuation. One quietly swelling feature eats the capacity every other bet was counting on.
+
+### 0. Intake — the proposal
+
+A big feature enters on a filled proposal (`docs/proposals/{slug}.md`) with the first gate — worth shaping + appetite — decided. If the ask arrives as a sentence, run `/proposal` first: interview the requester, write the proposal, decide the gate. `/signals` feeds it when the problem needs merchant-side evidence nobody has raised yet. Discovery then consumes the proposal as its evidence seed.
+
+### 1. UX Discovery + Demo (if the feature has UI)
 
 | Step          | Skill             | Output                                     |
 | ------------- | ----------------- | ------------------------------------------ |
@@ -32,11 +39,11 @@ Every phase ends at a **gate**: present, think together, adjust, then continue. 
 
 → **GATE (UX), GATE (Frontend).**
 
-### 1. Design Doc
+### 2. Design Doc
 
 Written section by section, not freehand. The method lives in `DESIGN_DOC_METHOD.md`; the structure in `design-doc.template.md`.
 
-- **Narrative** — Overview, Existing Solution, Use Cases + Business Rules, Alternatives, Open Questions. Port and sharpen from the discovery. → **GATE.**
+- **Narrative** — Overview, Existing Solution, Use Cases + Business Rules, Alternatives, Open Questions. Port and sharpen from the discovery. When the existing flow is call choreography across services, derive its sequence diagram with `/visual-review` — diagram what *is* before proposing what *will be*. → **GATE.**
 - **Technical** — each its own skill, each with its own fresh-eyes review:
   - `/design-schema` — entities, keys, indices, constraints, migrations
   - `/design-api` — endpoints, request/response shapes, domain errors
@@ -47,37 +54,44 @@ Each technical section runs the same loop: load context → draft with a one-lin
 
 → **GATE (Design doc).**
 
-### 2. Plan Tests ∥ Build
+### 3. Plan Tests ∥ Build + Test + Ship (per slice)
 
-Spawn a separate agent to plan tests from the design doc while you build. The implementer is biased toward the code they just wrote; a planner that never saw the implementation catches the blind spots.
+Spawn a separate agent to plan behavior scenarios from the design doc (`/plan-tests`) while `/build-feature` implements. The implementer is biased toward the code they just wrote; a planner that never saw the implementation catches the blind spots.
 
-| Track A (`/plan-tests`) | Track B (`/build-feature`)        |
-| ----------------------- | --------------------------------- |
-| Behavior scenarios      | Implementation + self-review sweep |
-| From the design doc     | From the design doc               |
+`/build-feature` reads its references in full, walks the new-module scoping checklist, saves its impl plan, and **slices the stack** — one complete use case per slice. There is no whole-feature "built" gate. Each slice runs the full pipeline on its own:
 
-`/build-feature` reads its references in full, walks the new-module scoping checklist, builds, then runs its own review sweep (references → simplifier → reviewer → jsdoc).
+**build + lint green → `/write-tests` (fresh agent, against the step-1 scenarios; gap report) → jsdoc on changed files → `/ship-pr`.**
 
-→ **GATE (Built):** build + lint green.
+- **`/write-tests`** converts scenarios into real tests and reports gaps — a gap in scenarios means add tests; a gap in implementation means surface it, don't silently make the test match the code.
+- **`/ship-pr`** opens a draft PR (sliced under ~400 source lines, per `ship-pr/references/pr-stack.md`), runs the review-agent sweep, you triage, then it marks ready.
 
-### 3. Write Tests + Verify
+Slices ship as they finish; `/ship-pr`'s preconditions are the gate, per PR.
 
-- **`/write-tests`** (fresh agent) converts scenarios into real tests and reports gaps:
-  - Gap in scenarios → add tests for cases the implementation handles
-  - Gap in implementation → surface it; don't silently make the test match the code
-- **`/chrome-verify`** (frontend) walks the scenarios as user flows, screenshots each at the narrow breakpoint.
+### 4. Review — the sweep
 
-### 4. Review
+Review isn't a phase bolted on at the end; it's the sweep `/ship-pr` runs on every PR. A panel of specialist agents comments inline, each against its own rubric:
 
-Backend was reviewed inside `/build-feature`. Run the review sweep on the frontend changes. Security review for sensitive changes. Human review for final approval.
+| Agent                     | Lane                                                |
+| ------------------------- | --------------------------------------------------- |
+| `security-reviewer`       | Vulnerabilities, sensitive changes                  |
+| `bug-hunter`              | Correctness — proves each claim with a failing test  |
+| `design-reviewer`        | Deep modules, layering, house-pattern fit            |
+| `conventions-reviewer`   | Naming, ubiquitous language, references conformance   |
+| `data-migration-reviewer` | Prod-volume breakage — when migrations/entities change |
 
-### 5. Ship
+You triage every finding. `/resolve-pr-comments` runs the reply-and-fix loop (verify, fix or push back, reply on every thread; capped at two rounds). Human review for final approval.
 
-Two repos → two cross-linked PRs (collapse to one if you're single-repo). Test critical paths. Deploy.
+### 5. Wire + Ship the Frontend
 
-### 6. Document (optional)
+Wire the demo to the real API per the design doc's API section. `/chrome-verify` (fresh agent) walks the step-1 scenarios as user flows and screenshots each at the narrow breakpoint. Then `/ship-pr` from the frontend repo, carrying `/pr-evidence` — a screenshot per state (empty, loading, error, populated), a GIF of the key interaction, before/after where behavior changed.
 
-`/project-writeup` — a factual record of the problem, the build, the bugs, the lessons. Not a story.
+Two repos → two cross-linked PRs (collapse to one if you're single-repo). Each body links the other repo's PR + the design doc + the discovery.
+
+### 6. Register the bet + Document
+
+Append the feature's row to the outcomes register: metrics with baselines, falsification lines, first check date a few weeks out. `/outcome-review` grades it when the date arrives — a shipped feature with no register row is a bet nobody can lose, so nobody learns from it.
+
+`/project-writeup` (optional) — a factual record of the problem, the build, the bugs, the lessons. Not a story.
 
 ---
 
@@ -95,7 +109,7 @@ Then build → two-agent tests → wire the UI to the real API → visual verify
 
 ### `/adhoc-feature` (small, backend)
 
-Skip the design doc; keep investigation, tests, and review. Understand → match existing patterns → implement → two-agent tests → review sweep → PR.
+Skip the design doc; keep investigation, tests, and review. Understand → match existing patterns → implement → two-agent tests → `/ship-pr` (review sweep) → PR.
 
 ---
 
@@ -104,6 +118,8 @@ Skip the design doc; keep investigation, tests, and review. Understand → match
 | Skill            | Purpose                                              |
 | ---------------- | --------------------------------------------------- |
 | `/fix-bug`       | TDD: failing test first, then fix, then PR           |
+| `/signals`       | Mine first-party sources for problems nobody raised  |
+| `/visual-review` | Interactive explainers + sequence diagrams for a diff |
 | `/observability` | Read-only prod triage → classify → fix or escalate   |
 | `/local-testing` | Test endpoints with auto-auth                        |
 | `/debug-errors`  | Investigate production errors                         |
@@ -119,8 +135,11 @@ Skip the design doc; keep investigation, tests, and review. Understand → match
 | Design method    | `docs/standards/DESIGN_DOC_METHOD.md`      |
 | Coding patterns  | `.claude/skills/build-feature/references/` |
 | Test patterns    | `.claude/skills/write-tests/references/`   |
+| PR-stack + review rubrics | `.claude/skills/ship-pr/references/` |
+| Proposals        | `docs/proposals/`                          |
 | Design docs      | `docs/design_docs/`                        |
 | Test scenarios   | `docs/for_ai/test_scenarios/`              |
+| Outcomes register | `docs/discovery/outcomes-register.md`     |
 
 ---
 

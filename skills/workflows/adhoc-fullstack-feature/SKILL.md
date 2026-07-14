@@ -9,25 +9,30 @@ A feature that touches both the API and the UI, driven UX-first across two repos
 
 ## Repos
 
-- **Backend repo** — branch + PR here.
-- **Frontend repo** — separate branch + PR here.
+- **Backend repo** — NestJS, jest. Branch + PR here.
+- **Frontend repo** — React/Vite. Separate branch + PR here.
 
 Two repos → two branches → two PRs, cross-linked. Run each repo's build/lint/test from that repo's root. (Single-repo? Collapse to one branch and one PR.)
 
 ## Three checkpoints — hard stops
 
-Stop at each and get the user's explicit sign-off before the next phase. They exist so divergence gets caught at the cheap stage, before a wrong assumption is built end to end.
+Stop at each and get the user's explicit sign-off before the next phase. They exist so divergence
+gets caught at the cheap stage, before a wrong assumption is built end to end.
 
-1. **UX** — after discovery + the HTML preview, before any production UI.
+1. **UX** — after discovery + the HTML preview, before any production UI. When the design serves a persona who is not the requester, the default here is a 15-minute walkthrough of `preview.html` with one person of that persona (protocol: `.claude/skills/ux-discovery/references/user-probes.md`) — or a recorded bet in the doc's Design Decisions naming why not and its cost-of-being-wrong.
 2. **Frontend** — after the demo UI, before backend design.
 3. **Backend design** — after the design doc, before backend implementation.
 
-Never proceed past a checkpoint on assumption. If the user redirects, fold it in and re-confirm.
+Never proceed past a checkpoint on assumption. If the user redirects, fold it in and re-confirm. At each checkpoint, state elapsed effort against the verdict's appetite; past appetite, the checkpoint becomes a shrink / stop decision recorded in `docs/proposals/DECISIONS.md`, not a silent continuation.
 
 ## Load skills, don't just read them
 
-- When a step names a skill (`/ux-discovery-lite`, `/frontend-build`, `/chrome-verify`, `/plan-tests`, `/write-tests`, `/fix-bug`), load it with the Skill tool and follow it as binding instructions. Reading the SKILL.md file is not running the skill.
-- When you spawn a sub-agent to run a skill, say so in its prompt ("invoke the Skill tool for X, follow every step, don't just read it") and require it to return proof of work — the artifact path, the findings list, the screenshots. If it returns nothing or clearly skipped the skill, re-run it.
+- When a step names a skill (`/ux-discovery-lite`, `/frontend-build`, `/chrome-verify`, `/plan-tests`,
+  `/write-tests`, `/ship-pr`, `/pr-evidence`, `/fix-bug`, `/optional/task-management`), load it with the Skill tool and
+  follow it as binding instructions. Reading the SKILL.md file is not running the skill.
+- When you spawn a sub-agent to run a skill, say so in its prompt ("invoke the Skill tool for X,
+  follow every step, don't just read it") and require it to return proof of work — the artifact path,
+  the findings list, the screenshots. If it returns nothing or clearly skipped the skill, re-run it.
 
 ## Inputs
 
@@ -35,23 +40,38 @@ Never proceed past a checkpoint on assumption. If the user redirects, fold it in
 
 ## When to use the full lifecycle instead
 
-If discovery surfaces a new module, a real schema migration, cross-cutting domain logic, or a multi-day / design-heavy scope, switch to `/ux-discovery` → full design doc → `/build-feature`.
+If discovery surfaces a new module, a real schema migration, cross-cutting domain logic, or a
+multi-day / design-heavy scope, switch to `/ux-discovery` → full design doc → `/build-feature`.
 
 ## Workflow
 
 ### 1. UX discovery + HTML preview — main session
 
-Load `/ux-discovery-lite`. Clarify intent (2-5 Qs), challenge assumptions, quick design. Write to `docs/discovery/{feature-name}/DISCOVERY-LITE.md`.
+Load `/ux-discovery-lite` (it lives in the frontend repo's `.claude/skills/`). If the input is a
+shallow sentence with no proposal behind it, the skill's intake runs the proposal probes first (the
+last concrete incident, frequency × breadth × cost, what's been tried without software, the outcome);
+a full `/proposal` doc is optional at this scale. Clarify intent (2-5 Qs), challenge assumptions,
+reach a verdict, quick design. Write to
+`docs/discovery/{feature-name}/DISCOVERY-LITE.md`.
 
-Then build a cheap, low-fidelity **HTML mockup** of the key screen(s) and states — throwaway, not production code — so the UX is visible before any engineering effort goes into the real frontend. Save it to `docs/discovery/{feature-name}/preview.html` and render it inline for the user (the visualize widget works well for this).
+If the verdict lands on probe / solve another way / not now, stop there and present that deliverable —
+a successful outcome, not a failed run.
+
+Then build a cheap, low-fidelity **HTML mockup** of the key screen(s) and states — throwaway, not
+production code — so the UX is visible before any engineering effort goes into the real frontend.
+Save it to `docs/discovery/{feature-name}/preview.html` and render it inline for the
+user (the visualize widget works well for this).
 
 → **CHECKPOINT 1 (UX):** walk the user through the design and the HTML preview. Get sign-off before building production UI.
 
 ### 2. Frontend demo — `/frontend-build`, main session
 
-Load `/frontend-build` against `DISCOVERY-LITE.md` + the approved preview, operating in the frontend repo. Component inventory gate (shadcn first), build with craft, polish pass, design-smell scan, i18n keys, responsive (check the narrow breakpoint).
+Load `/frontend-build` against `DISCOVERY-LITE.md` + the approved preview, operating in the frontend
+repo. Component inventory gate (shadcn first), build with craft, polish pass, design-smell scan, i18n
+keys, responsive (check the narrow breakpoint).
 
-Demo mode: a typed service returning mock data shaped to what the UX needs (`// TODO: Replace with real API`). This is a first cut — the real API shape is settled in step 3, not here.
+Demo mode: a typed service returning mock data shaped to what the UX needs (`// TODO: Replace with
+real API`). This is a first cut — the real API shape is settled in step 3, not here.
 
 From the frontend root: `npm run build && npm run lint`
 
@@ -63,15 +83,17 @@ Read first: your engineering principles (PHILOSOPHY.md) + `.claude/skills/build-
 
 - **Data design** — entities, keys, schema diffs, constraints, indices, access patterns, migration/backfill (idempotent).
 - **API design** — endpoints, request/response schemas, domain errors. Owner/tenant-scoped params; JSON shapes mirroring the schema; static labels as translation keys; a consistent empty-data envelope where it applies. This is the real contract — heavy backend influence, aligned to the approved UX + demo.
-- **Components design** — backend modules/services/interfaces touched, data flow, edge cases, invariants.
+- **Components Design** — backend modules/services/interfaces touched, data flow, edge cases, invariants.
 
-Skip the template's other sections (Overview, Existing Solution, Use Cases, Alternatives, Open Questions, etc.). Find a similar existing endpoint and mirror it.
+Skip the template's other sections (Overview, Existing Solution, Use Cases, Alternatives, Open
+Questions, etc.). Find a similar existing endpoint and mirror it.
 
 → **CHECKPOINT 3 (Backend design):** get sign-off on schema + API + components before writing backend code.
 
 ### 4. Build the backend — main session
 
-Implement the design doc. Identify files (entity, service, controller, dto, spec). Match existing patterns. No `any`, no comment spam, build only what's designed.
+Implement the design doc. Identify files (entity, service, controller, dto, spec). Match existing
+patterns. No `any`, no comment spam, build only what's designed.
 
 `npm run build && npm run lint`
 
@@ -90,59 +112,64 @@ Exception: external-service-heavy (test would be 90% mocks) → skip both, call 
 
 ### 6. Wire the frontend to the real API — main session
 
-Replace the demo service with the real api-client call against the design doc's API section. Where the demo's assumed shape and the real API don't line up, adjust the frontend types or the API to match — wiring is where the shape settles. Keep an analytics event on every state-changing action.
+Replace the demo service with the real api-client call against the design doc's API section. Where the
+demo's assumed shape and the real API don't line up, adjust the frontend types or the API to match —
+wiring is where the shape settles. Keep an analytics event on every state-changing action.
 
 From the frontend root: `npm run build && npm run lint`
 
 ### 7. Verify the UI flow — fresh sub-agent
 
-Spawn a separate agent (not the builder) to load `/chrome-verify`. Give it the planned test scenarios from step 5 as influence, **re-framed from the UI perspective as the user's flow(s)** — what they actually do and see end to end, not isolated cases. If the feature has multiple paths, walk each; if one path, walk it.
+Spawn a separate agent (not the builder) to load `/chrome-verify`. Give it the planned test scenarios
+from step 5 as influence, **re-framed from the UI perspective as the user's flow(s)** — what they
+actually do and see end to end, not isolated cases. If the feature has multiple paths, walk each;
+if one path, walk it.
 
-Run at the **narrow breakpoint** (where responsiveness breaks; desktop is usually fine). Capture a screenshot at each scenario/step of the flow, save them under the discovery folder, and return the paths + a pass/fail per view. Surface the screenshots to the user so they see each path.
+Run at the **narrow breakpoint** (where responsiveness breaks; desktop is usually fine). Capture a screenshot at each
+scenario/step of the flow, save them under the discovery folder, and return the paths + a pass/fail per
+view. Surface the screenshots to the user so they see each path.
 
-### 8. Review & re-iterate — per repo
+### 8. JSDoc sweep — per repo
 
-Run the `/adhoc-feature` sweep on each repo, using that repo's references:
+Run the `jsdoc` agent on each repo's changed files. It edits code directly, so it runs before the PRs.
 
-- references agent (aligned with that repo's references) → code-simplifier
+### 9. Ship — /ship-pr per repo, cross-linked
 
-then
+Backend PR in the backend repo, frontend PR in the frontend repo. Run git + gh from each repo root (or `gh -R`
+the right repo). Either side over 400 changed source lines (tests/docs excluded) → slice it per
+`.claude/skills/ship-pr/references/pr-stack.md` first.
 
-- code-reviewer (verify claims, prefer a failing test via `/fix-bug`) → jsdoc on changed files
+Load `/ship-pr` for each repo. Per PR it opens the **draft PR** (What / Why / Stack / Tests / **Try it**
+— for the backend a curl + expected JSON, for the frontend the flow to click through), then spawns the
+review sweep — `security-reviewer`, `design-reviewer`, `conventions-reviewer`, `bug-hunter` (fed the
+design doc + step-5 scenarios + gap report), `data-migration-reviewer` when the diff touches
+migrations/entities/queries. The agents comment inline on the PR; triage every thread, then mark ready.
 
-Backend uses `build-feature/references`; frontend uses `frontend-build/reference` + its CLAUDE.md. Each agent returns its findings; an agent that returns nothing skipped the work — re-run it.
+The frontend PR carries evidence from `/pr-evidence`, captured from the branch's final state: a
+screenshot per state (empty, loading, error, populated), a GIF of the key interaction end to end,
+before/after where behavior changed. Triage changed UI code → re-capture before marking ready.
 
-### 9. PRs (two, cross-linked)
+Each PR body links the other PR and its doc (design doc / discovery doc): `Paired PR: [other repo PR URL]`.
 
-Backend PR in the backend repo, frontend PR in the frontend repo. Run git + gh from each repo root. Each body links the other PR and its doc (design doc / discovery doc).
+### 10. Register the bet + log
 
-```bash
-git add -A && git commit -m "feat: [short description]"
-git push -u origin claude/[branch-name]
-gh pr create --title "[short description]" --body "## What
-[One-line summary]
+Append the feature's row to `docs/discovery/outcomes-register.md`: the observable
+changes from DISCOVERY-LITE's "How we'll know it worked" (with baselines and sources of truth), any
+Design Decisions bets' falsification lines, first check date ≥ 3 weeks post-ship. `/outcome-review`
+grades it when the date arrives.
 
-## Why
-[The user problem this solves]
-
-## Tests
-[What you added, or 'No tests — external-service-heavy']
-
-Paired PR: [other repo PR URL]"
-```
-
-### 10. Log
-
-One task covering both PRs (see `/optional/task-management`). Link both + the docs. Status: `in review`. Description for non-technical reviewers — lead with the user-facing problem and change, no file paths or code jargon.
+Then one `/optional/task-management` task covering both PRs. Link both + the docs. Status: `in review`. Description for
+non-technical reviewers — lead with the user-facing problem and change, no file paths or code jargon.
 
 ## Output
 
-Report: feature shipped, backend + frontend files touched, the design doc + discovery doc, tests (or why not), both PR URLs, task link.
+Report: feature shipped, backend + frontend files touched, the design doc + discovery doc, tests
+(or why not), both PR URLs, task link.
 
 ## CRITICAL Rules
 
 - The three checkpoints are mandatory. Never run the whole flow on assumption.
-- The design doc's API section is the source of truth — the backend response and the frontend types must match it exactly.
+- The design doc's API section is the source of truth — the backend response and the frontend TS types must match it exactly.
 - Load skills with the Skill tool and apply them; verify sub-agents did the work.
 - Two repos, two PRs — never mix frontend and backend changes into one repo.
 - Match existing patterns; no new ones without discussion. No `any` types. Comments only when code can't express intent. Deep modules — small interface over hidden complexity.
