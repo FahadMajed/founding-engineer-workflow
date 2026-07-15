@@ -29,10 +29,10 @@ Three entry points. Pick by how big the work is, not by habit.
 
 ```
 BIG feature (days, API + UI)        →  /sdlc
-   ux-discovery → frontend demo → full design doc
+   proposal → ux-discovery → frontend demo → full design doc
    (narrative + design-schema ∥ design-api ∥ design-components)
-   → plan-tests ∥ build-feature → write-tests + chrome-verify
-   → review → two cross-linked PRs
+   → plan-tests ∥ build-feature (build → test → ship, per slice)
+   → wire + chrome-verify → two cross-linked PRs → register the bet
 
 MEDIUM feature (hours, API + UI)    →  /adhoc-fullstack-feature
    ux-discovery-lite + HTML preview → demo → short design doc
@@ -40,16 +40,20 @@ MEDIUM feature (hours, API + UI)    →  /adhoc-fullstack-feature
    (three hard checkpoints: UX, frontend, backend design)
 
 SMALL feature (hours, backend)      →  /adhoc-feature
-   understand → implement → two-agent tests → review → PR
+   understand → implement → two-agent tests → ship → PR
 ```
 
-Supporting flows: **`/fix-bug`** (TDD bug fix), **`/observability`** (production triage), **`/project-writeup`** (document what you built).
+Every slice ships through **`/ship-pr`**: open a draft PR, run the review-agent sweep (they comment inline), triage every finding, then mark ready — followed by **`/resolve-pr-comments`** for the reply-and-fix loop.
+
+Supporting flows: **`/proposal`** (problem-first intake), **`/signals`** (mine sources for problems nobody raised), **`/fix-bug`** (TDD bug fix), **`/visual-review`** (interactive explainers + sequence diagrams), **`/project-writeup`** (document what you built), **`/outcome-review`** (grade the bet after it ships).
 
 A few ideas run through all of it:
 
 - **You steer between phases.** The agent moves fast; you think with it at the gates — push back on the design, critique a test scenario, raise the bar on quality. The aim is fast *and* maintainable, because maintainable code is what keeps you fast.
 - **Design before code.** Big features get a real design doc, drafted section by section (schema, API, components), each with a fresh-eyes review before anything is built.
 - **Tests written by someone who didn't write the code.** `/plan-tests` and `/write-tests` run as two separate agents so coverage comes from the spec, not from the implementation's blind spots.
+- **Review is a sweep of specialist agents, not one pass.** Each PR gets a panel — security, design, conventions, bug-hunter, data-migration — commenting inline against a distinct rubric. You triage; they don't merge for you.
+- **A shipped feature is a bet you can grade.** Big features register their metrics + falsification lines at ship time, and `/outcome-review` scores them later — so the loop closes and you actually learn.
 
 ## Quick Start
 
@@ -91,21 +95,42 @@ Copy `templates/CLAUDE.template.md` to your project root as `CLAUDE.md`. Fill in
 | `/adhoc-fullstack-feature` | A small feature spanning API + UI — hours, not days             |
 | `/adhoc-feature`           | A small backend feature — no design doc, single PR              |
 
-### Core (backend feature work)
+### Discovery & product
 
 | Skill                | Purpose                                                              |
 | -------------------- | ------------------------------------------------------------------- |
+| `/proposal`          | Problem-first intake — interview, then a proposal that feeds a workflow |
+| `/signals`           | Mine first-party sources for problems nobody raised, tier the evidence |
 | `/ux-discovery`      | Deep UX thinking before building. Outputs a structured discovery doc |
 | `/ux-discovery-lite` | Lightweight discovery for small features                            |
+| `/outcome-review`    | Grade a shipped bet against the metrics + falsification lines it predicted |
+
+### Design
+
+| Skill                | Purpose                                                              |
+| -------------------- | ------------------------------------------------------------------- |
 | `/analyze-design`    | Find gaps in a design doc before implementation                     |
 | `/design-schema`     | Draft the Data design section — entities, keys, indices, migrations  |
 | `/design-api`        | Draft the API design section — endpoints, shapes, domain errors      |
 | `/design-components` | Draft the Components design section — modules, interfaces, data flow |
+
+### Build & test
+
+| Skill                | Purpose                                                              |
+| -------------------- | ------------------------------------------------------------------- |
 | `/plan-tests`        | Create behavior scenarios from the design (before code exists)       |
-| `/build-feature`     | Implement features following codebase patterns                      |
+| `/build-feature`     | Implement features following codebase patterns; ships per slice      |
 | `/write-tests`       | Convert scenarios to tests, detect gaps                             |
 | `/fix-bug`           | TDD bug fix — failing test first, then fix, then PR                  |
-| `/project-writeup`   | Document the feature factually — what, why, bugs, lessons            |
+
+### Review & ship
+
+| Skill                   | Purpose                                                          |
+| ----------------------- | --------------------------------------------------------------- |
+| `/ship-pr`              | Draft PR → review-agent sweep (inline) → triage → mark ready     |
+| `/resolve-pr-comments`  | Triage and resolve review comments — verify, fix or push back, reply |
+| `/visual-review`        | Interactive explainers + Mermaid sequence diagrams for code under review |
+| `/project-writeup`      | Document the feature factually — what, why, bugs, lessons        |
 
 ### Frontend
 
@@ -113,6 +138,7 @@ Copy `templates/CLAUDE.template.md` to your project root as `CLAUDE.md`. Fill in
 | ------------------ | --------------------------------------------------- |
 | `/frontend-build`  | Build polished UI from discovery docs (shadcn-first) |
 | `/chrome-verify`   | Visual verification with headless screenshots        |
+| `/pr-evidence`     | State screenshots + interaction GIF + before/after on a PR |
 | `/design-critique` | Structured design feedback on a concept or built UI  |
 | `/ux-touch`        | Design a targeted addition to a shipped feature      |
 
@@ -123,12 +149,21 @@ Copy `templates/CLAUDE.template.md` to your project root as `CLAUDE.md`. Fill in
 | `local-testing`       | Test endpoints with auto-auth            |
 | `debug-errors`        | Investigate production errors            |
 | `observability`       | Read-only prod triage → classify → route |
-| `task-management`     | Integrate with ClickUp/Linear/etc        |
-| `resolve-pr-comments` | Address code review feedback             |
+| `task-management`     | Integrate with your task tracker         |
 
 ## Agents
 
-The review steps lean on subagents in [`agents/`](agents/): `code-reviewer` (correctness), `qa-reviewer` (test coverage), `code-explorer` (find patterns to match), `security-reviewer` (sensitive changes). Copy them to `.claude/agents/`.
+`/ship-pr` runs a **review sweep** — a panel of subagents in [`agents/`](agents/), each reviewing the PR diff against a distinct rubric and commenting inline:
+
+| Agent                     | Lane                                                        |
+| ------------------------- | ---------------------------------------------------------- |
+| `security-reviewer`       | Vulnerabilities and sensitive changes (high confidence bar) |
+| `bug-hunter`              | Correctness — proves each claim with a failing test         |
+| `design-reviewer`        | Design quality — deep modules, layering, house patterns     |
+| `conventions-reviewer`   | Naming, ubiquitous language, conformance to your references  |
+| `data-migration-reviewer` | What breaks at prod data volume — only when migrations/entities change |
+
+Plus `code-explorer` (find patterns to match before building) and `qa-reviewer` (test-scenario coverage). Copy them all to `.claude/agents/`.
 
 ## File Structure
 
@@ -137,12 +172,14 @@ your-project/
 ├── .claude/
 │   ├── skills/
 │   │   ├── sdlc/  adhoc-feature/  adhoc-fullstack-feature/
-│   │   ├── ux-discovery/  design-schema/  design-api/  design-components/
+│   │   ├── proposal/  ux-discovery/  signals/  outcome-review/
+│   │   ├── design-schema/  design-api/  design-components/
 │   │   ├── build-feature/references/      # your backend patterns
 │   │   ├── write-tests/references/        # your test patterns
+│   │   ├── ship-pr/references/            # PR-stack rules, review rubrics
 │   │   ├── frontend-build/reference/      # design-smell guides, shadcn-first
 │   │   └── ...
-│   └── agents/
+│   └── agents/                            # the review-sweep panel
 ├── docs/
 │   ├── standards/
 │   │   ├── DESIGN_DOC_METHOD.md

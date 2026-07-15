@@ -26,39 +26,33 @@ Implement features following established patterns.
 
 ### 1. Understand Scope
 
-1. Read the design doc from `docs/design_docs/` (primary input).
-2. Check if an implementation plan exists in `docs/for_ai/plans/`.
-3. Identify files to create/modify.
+1. Read the design doc from `docs/design_docs/` (primary input)
+2. Check if implementation plan exists in `docs/for_ai/plans/`
+3. Identify files to create/modify
 
 ### 2. Plan (if no impl plan exists)
 
-1. Walk the scoping checklist in [references/new-module-map.md](references/new-module-map.md).
-2. Analyze similar features in the codebase (using the `code-explorer` agent).
-3. Deeply think & plan the feature.
-4. Copy the approved plan you wrote to `docs/for_ai/plans/FEATURE_NAME_IMPLEMENTATION_PLAN.md`.
-5. If no plan file exists and you are not in plan mode, notify the user to switch to plan mode — this is a must.
-6. Implement your plan.
-7. Verify with `npm run build` & `npm run lint` — that is the full extent of build-step verification.
-8. Do NOT run tests or write a manual test plan. Functional/QA correctness is delegated to the separate review agents in "Review & Re-iterate" below.
+1. Walk the scoping checklist in [references/new-module-map.md](references/new-module-map.md)
+2. Analyze similar features in codebase (using code-explorer agent)
+3. Deeply Think & Plan feature
+4. Slice the PR stack as part of the plan — big features are stacks by default, **one complete use case per slice** (its schema, logic, endpoint, edge cases, and tests ride together; foundation ships with the first use case that needs it). ~400 source lines per slice is the sizing signal — a use case far over it was cut too big in the design. Read `.claude/skills/ship-pr/references/pr-stack.md`.
+5. Save the plan to `docs/for_ai/plans/FEATURE_NAME_IMPLEMENTATION_PLAN.md` and **proceed — no user sign-off on the plan**. The PR review sweep is the quality gate now; the design doc already carried the human decisions.
+6. **The plan is immutable once implementation starts.** Never edit it to match what you ended up building — it is the record of the first shot. Diffing it against the shipped PRs and the sweep's findings is how planning quality gets measured and improved.
 
-### 3. When you finish, Review & Re-iterate
+### 3. Build (per slice)
 
-Launch 2 agents sequentially with different focuses:
+1. Implement the slice on its stack branch.
+2. Verify with `npm run build` & `npm run lint` — that is the full extent of build-step verification.
+3. Do NOT write a manual test plan. The slice's tests come from the two-agent split: if the caller already produced a scenarios doc (e.g. sdlc's plan-tests step), skip Agent A and spawn only `/write-tests` (fresh agent B) against it for this slice's behavior; otherwise run both `/plan-tests` and `/write-tests` as fresh sub-agents yourself. Functional review comes from the PR sweep in step 4.
 
-- A references agent that ensures your WIP is 100% aligned with the references/ under this skill.
+### 4. Ship (per slice) — /ship-pr
 
-Then:
+Run the `jsdoc` agent on changed files (it edits code — pre-PR), then load `/ship-pr`: it opens the draft PR (What / Why / Stack / Tests / Try it), spawns the review sweep — `security-reviewer`, `design-reviewer`, `conventions-reviewer`, `bug-hunter` (fed the design doc + scenarios + gap report), `data-migration-reviewer` when the diff touches migrations/entities/queries — which comments inline on the PR, then triages every thread and marks ready. Review happens on the PR, not before it.
 
-- Simplicity/DRY/Elegance and ALL refactoring principles: code quality and maintainability, focused on reuse without compromising human readability (code-simplifier agent).
-
-Once you resolve what is needed, spawn 2 more agents:
-
-- Bugs/Correctness: functional correctness and logic errors (code-reviewer), and verify the claims, preferably with a failing test using `/fix-bug`.
-- JSDoc cleanup: delete noisy docs, add missing docs for non-obvious behavior (jsdoc agent on changed files).
 
 ## CRITICAL Rules
 
-- Never introduce new patterns without discussion — it's fine to suggest or improve some patterns.
-- Never use `any` types — define interfaces, unless you can't help it.
-- Add comments only when code cannot express intent; do not throw comments on every line.
-- **Deep modules** — modules should have simple interfaces that hide complex implementation. A good module does a lot behind a small API surface. If a class/service interface is almost as complex as its implementation, it's too shallow — rethink the abstraction.
+- Never introduce new patterns without discussion, it is fine to improve to suggest or improve some patterns.
+- Never use `any` types - define interfaces, unless you cant help it
+- Add comments only when code cannot express intent, do not throw comments on every line
+- **Deep modules** — Modules should have simple interfaces that hide complex implementation. A good module does a lot behind a small API surface. If a class/service interface is almost as complex as its implementation, it's too shallow — rethink the abstraction.
