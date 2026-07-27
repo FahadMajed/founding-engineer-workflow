@@ -29,13 +29,13 @@ Three entry points. Pick by how big the work is, not by habit.
 
 ```
 BIG feature (days, API + UI)        →  /sdlc
-   proposal → ux-discovery → frontend demo → full design doc
-   (narrative + design-schema ∥ design-api ∥ design-components)
+   proposal → ux-discovery → production frontend (mocked API) → full design doc
+   (narrative + design-schema ∥ design-api ∥ design-components ∥ design-internals)
    → plan-tests ∥ build-feature (build → test → ship, per slice)
    → wire + chrome-verify → two cross-linked PRs → register the bet
 
 MEDIUM feature (hours, API + UI)    →  /adhoc-fullstack-feature
-   ux-discovery-lite + HTML preview → demo → short design doc
+   ux-discovery-lite → production frontend (mocked API) → short design doc
    → build → two-agent tests → wire + visual verify → two PRs
    (three hard checkpoints: UX, frontend, backend design)
 
@@ -50,7 +50,7 @@ Supporting flows: **`/proposal`** (problem-first intake), **`/signals`** (mine s
 A few ideas run through all of it:
 
 - **You steer between phases.** The agent moves fast; you think with it at the gates — push back on the design, critique a test scenario, raise the bar on quality. The aim is fast *and* maintainable, because maintainable code is what keeps you fast.
-- **Design before code.** Big features get a real design doc, drafted section by section (schema, API, components), each with a fresh-eyes review before anything is built.
+- **Design before code.** Big features get a real design doc, drafted section by section (schema, API, components, internals), each with a fresh-eyes review before anything is built.
 - **Tests written by someone who didn't write the code.** `/plan-tests` and `/write-tests` run as two separate agents so coverage comes from the spec, not from the implementation's blind spots.
 - **Review is a sweep of specialist agents, not one pass.** Each PR gets a panel — security, design, conventions, bug-hunter, data-migration — commenting inline against a distinct rubric. You triage; they don't merge for you.
 - **A shipped feature is a bet you can grade.** Big features register their metrics + falsification lines at ship time, and `/outcome-review` scores them later — so the loop closes and you actually learn.
@@ -112,7 +112,8 @@ Copy `templates/CLAUDE.template.md` to your project root as `CLAUDE.md`. Fill in
 | `/analyze-design`    | Find gaps in a design doc before implementation                     |
 | `/design-schema`     | Draft the Data design section — entities, keys, indices, migrations  |
 | `/design-api`        | Draft the API design section — endpoints, shapes, domain errors      |
-| `/design-components` | Draft the Components design section — modules, interfaces, data flow |
+| `/design-components` | Draft the Components design section — the outside: modules, interfaces, data flow |
+| `/design-internals`  | Draft the Internal design section — the inside: computations, state machines, invariants, replay |
 
 ### Build & test
 

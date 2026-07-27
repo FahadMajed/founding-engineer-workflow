@@ -67,13 +67,17 @@ Two entry shapes:
 
 Load `references/evidence.md` and follow it: story-based questions, the anecdote interrogation, the three-hats disambiguation, tier stamps.
 
-Ask the most relevant 3–5 scoping questions. Questions the proposal or the ledgers already answer are not re-asked — cite the banked answer verbatim and interrogate only what's thin or new (per `evidence.md`, The ledger). Evidence and framing questions are free-text in chat — never AskUserQuestion options (an offered option stops the requester thinking); option-style questions are fine for closed administrative choices only (which persona is primary, in/out of scope).
+Ask the most relevant 3–5 scoping questions, **ranked by blast radius: questions whose answers would change the architecture or the design's shape come first; never spend the question budget on trivia.** Questions the proposal or the ledgers already answer are not re-asked — cite the banked answer verbatim and interrogate only what's thin or new (per `evidence.md`, The ledger). Evidence and framing questions are free-text in chat — never AskUserQuestion options (an offered option stops the requester thinking); option-style questions are fine for closed administrative choices only (which persona is primary, in/out of scope).
 - **Evidence:** "What have you actually seen or heard that tells you this is a problem — a specific incident, a thread, a report — or is it your read?" Then interrogate it.
 - **Timing:** "What happened recently that made you raise this now?"
 - **Current reality:** "Walk me through how this is handled today — what's the workaround?" "What gets discovered too late?"
 - **Business:** what's driving this, what success looks like, constraints.
 - **Users:** which persona, and if several, which is primary.
 - **Scope:** explicitly in / out; related problems to fold in or ignore; existing pages to match or deliberately differ from (ask the requester).
+- **Unknown-knowns harvest:** "What about this domain feels too obvious to mention — the thing everyone here knows that I'd get wrong?" The requester's unstated obvious is exactly what a designer improvises incorrectly (an account model, a settlement mechanic, a policy quirk); one question here is cheaper than two correction rounds later.
+- **References:** "Point me at an existing screen, product, or tool you rate for this job — ours or a competitor's." A concrete reference imports conventions the requester can't verbalize; reacting beats describing.
+
+And give one back — a **blind-spot brief**: after hearing the ask, tell the requester in a few lines what this domain's known potholes are, what "good" looks like for this kind of feature, and what questions they should be asking you. The goal is to make the requester specify better, not to decide for them.
 
 Do NOT ask UX questions — flows, IA, interactions are your job.
 
@@ -81,13 +85,19 @@ Write questions and answers verbatim to `requester-input.md` (this is the proven
 
 ## 3. Framing
 
-Load `references/framing.md` and produce `00-framing.md`: the problem/opportunity statement (binary test), the ladder from the requested attribute to consequence and stake, the outcome gate, sizing with real numbers, the evidence table (tier, provenance, sampling caveat, consequence), the per-persona role disposal, the assumption map with cheapest tests, and a proposed verdict.
+Load `references/framing.md` and produce `00-framing.md`: the problem/opportunity statement (binary test), the ladder from the requested attribute to consequence and stake, the mechanism chain down from the incident with the intervention rung the verdict targets, the outcome gate, sizing with real numbers, the evidence table (tier, provenance, sampling caveat, consequence), the per-persona role disposal, the assumption map with cheapest tests, and a proposed verdict.
 
 Tick **Gate F** visibly. If the core claim has no interrogated T1–T3 incident behind it, the verdict is Probe — propose the cheapest way to get one real data point instead of proceeding.
 
 ## 4. Exploration
 
-Widen the lens before solutions: competitors and cross-domain analogs (search the web; apply the comparability test — same job? same frequency and stakes? similar user sophistication? — and note what each borrowed pattern assumes), adjacent problems, what we don't know. Use `references/domain.md` for channel mechanics, the automation frontier, and the pattern library.
+Widen the lens before solutions — with a real **web-research sweep**, not model memory. Model knowledge of competitors, channels, and user behavior is a prior, never a source (per `evidence.md`); only searched-and-cited findings enter FACTS. The sweep is the default for every discovery; skipping it takes a written reason in `01-exploration.md` (rare — e.g. a purely internal-ops mechanism with no external surface).
+
+**Derive the angles from this feature's context** — the framing's unknowns, the personas, the channels touched — and name them before searching; a fixed checklist run on every feature is ritual, not research. Common angles to draw from: competitors on the same job (apply the comparability test — same job? same frequency and stakes? similar user sophistication? — and note what each borrowed pattern assumes); cross-domain analogs solving the same *shape* of problem; official channel/policy ground truth (re-verify anything load-bearing from `references/domain.md` older than a quarter); market or benchmark numbers for what the framing left [UNVERIFIED]. Then add what only this feature raises — a returns feature pulls in reverse-logistics practice, a pricing feature the repricer landscape. Run multiple searches per angle and fetch the promising hits — a single query per angle is a token gesture.
+
+Record the sweep in `01-exploration.md`: the angles chosen and why those, then per angle what was searched and what it yielded — a cited finding (source + URL + date, tiered per `evidence.md`) or "nothing found", which is itself a finding. Adjacent problems and what we don't know round out the picture. Use `references/domain.md` for channel mechanics, the automation frontier, and the pattern library.
+
+Alongside the outward sweep, inventory **the domain's native artifacts** (per `references/view-archetypes.md`, step 1): the real-world documents, files, and records this domain produces — statements, schedules, transaction rows, fee tables, claim forms — and who reads each today, for what decision. These are FACTS; design will derive view candidates from them.
 
 Do **not** scan the codebase and do not feed product internals into exploration — reuse belongs to design. If feasibility genuinely blocks thinking, ask the requester.
 
@@ -97,7 +107,7 @@ Write `01-exploration.md` split into **FACTS** (verified, cited observations —
 
 ### CHECKPOINT 1 — Problem, evidence, verdict. STOP.
 
-Present to the requester, plain-language first (per the checkpoint rule): the decision needed, the framing summary, the evidence weak spots in plain words (the full table stays in `00-framing.md`), exploration insights, open questions (business, domain, technical — anything you can't answer), and the **verdict recommendation**: build / shrink / probe first / solve another way / not now, with the reason.
+Present to the requester, plain-language first (per the checkpoint rule): the decision needed, the framing summary, the evidence weak spots in plain words (the full table stays in `00-framing.md`), exploration insights (what the web sweep surfaced, with sources — or the written reason it was skipped), open questions (business, domain, technical — anything you can't answer), and the **verdict recommendation**: build / shrink / probe first / solve another way / not now, with the reason.
 
 If the verdict lands on anything other than build or shrink, the discovery ends here with that deliverable (the probe plan, the process fix, the tool to evaluate). Append the decision to `requester-input.md`. **Wait for sign-off before Stage 5.**
 
@@ -105,7 +115,7 @@ If the verdict lands on anything other than build or shrink, the discovery ends 
 
 ## 5. Ideation & synthesis
 
-Load `references/ideation.md` and follow it exactly: 3 spawned agents differentiated by objective + mutually exclusive hard constraint (at least one barred from the requester's parked candidate by name; an evidence packet as a third axis only where the material genuinely partitions), plus the kill-case agent armed with the real evidence gaps. Each agent receives the shared base (problem + outcome + personas + FACTS) plus its own objective and constraint — never BETS, never your leanings, never each other. Then synthesis: dispose of every concept, discount seeded convergence, sacrifice something, test the key insight against the action envelope, pre-mortem. Write `02-ideation/*` and `03-synthesis.md`. Tick **Gate I**.
+Load `references/ideation.md` and follow it exactly: 1 baseline agent (shared base only, full autonomy — the incumbent to beat) + 3 spawned agents differentiated by objective + mutually exclusive hard constraint (at least one barred from the requester's parked candidate by name; an evidence packet as a third axis only where the material genuinely partitions), plus the kill-case agent armed with the real evidence gaps. Each agent receives the shared base (problem + outcome + personas + FACTS) plus its own objective and constraint — never BETS, never your leanings, never each other. Then synthesis: dispose of every concept, discount seeded convergence, sacrifice something, test the key insight against the action envelope, pre-mortem. Write `02-ideation/*` and `03-synthesis.md`. Tick **Gate I**.
 
 No generic or abstract writing — "sorted by urgency"? Say exactly what urgency means and how it's computed.
 
@@ -115,12 +125,16 @@ Before detailed design, ground the chosen direction with the requester (2–3 qu
 
 ## 7. Design
 
-Load `references/design-judgment.md` and `references/domain.md`. Now the codebase is relevant: match existing product patterns where they fit, flag new primitives as inventions.
+Load `references/design-judgment.md`, `references/domain.md`, and `references/view-archetypes.md`. Now the codebase is relevant: match existing product patterns where they fit, flag new primitives as inventions.
 
 Produce `04-design.md`:
 - **User flows** — entry, happy path, alternates, recovery; edge cases domain-first.
+- **View derivation** — candidates derived per `view-archetypes.md` (from the domain artifacts inventoried in exploration + the personas' question shapes), each dispositioned build / defer / N-A-because.
+- **Surface map** — every existing screen of the app, dispositioned against this capability: gains an entry point / gains a column-or-panel / unchanged-because. A capability that lives only on its own page while sibling surfaces stay silent is usually an IA defect — the map makes that a decision, not an accident.
+- **Rabbit holes** (Shape Up) — the parts of this design that are under-specified or could balloon during build. Derive the classes from this feature's own context (recurring shapes: an external-API capability assumed but unverified, data availability at the needed grain, shared-account attribution, a volume cliff, per-channel semantic differences — but the feature names its own). Each is **patched** (specified now), **cut** (declared out, recorded), or **spiked** (a time-boxed probe scheduled before build). An unpatched rabbit hole is where the builder will improvise.
 - **IA** — components with attention levels, each passing the decision test; per-screen cognitive mode and exit action.
 - **Interactions** — inputs, feedback, defaults, confirmations, shortcuts; the recommendation five-pack where the system suggests; mobile (what's essential at 375px).
+- **Single-tenant pass** on any scope-dimensioned surface — a self-serve customer's whole account is usually one scope entity, so N=1 is a primary state, not an edge case: no scope pickers, no scope labels, no one-row comparison tables; the single-tenant layout is designed to spend the space, and it keys on cardinality, never on persona (frontend-build `reference/single-tenant.md`).
 - **Peak stress test and primary-language pass** (from domain.md) on anything with trends, thresholds, stock math, or user-facing copy.
 - **Principle-disposition table** — each product principle: adopted, or exception argued.
 
@@ -132,6 +146,9 @@ Design rationale goes in its own section, not inlined into component description
 - [ ] Peak stress test and primary-language pass recorded
 - [ ] Principle-disposition table complete — no silent deviations
 - [ ] Every element labeled: cited to evidence, convention (pattern named), or invention (justified)
+- [ ] View candidates derived and dispositioned (view-archetypes.md)
+- [ ] Surface map complete — every existing screen dispositioned
+- [ ] Rabbit holes named, each patched / cut / spiked
 
 ---
 
@@ -153,14 +170,19 @@ Load `references/document.md` and write `DISCOVERY.md` — all 16 sections, incl
 
 After composing, run the **document-fields pass**: a fresh agent checks `DISCOVERY.md` alone against design-critique's final-document items (metric baselines, discovery delta, steelman fidelity, open-questions ledger); append its findings to `05-critique.md` and fix before presenting — these fields exist only in the final document, so no earlier critique saw them.
 
-End by asking the requester to review: edit the design or proceed. When the design serves a persona who is not the requester, the default next step once `preview.html` exists is a 15-minute walkthrough with one person of that persona (protocol in `references/user-probes.md`) — or a recorded §12 bet naming why not and its cost-of-being-wrong.
+End by asking the requester to review: edit the design or proceed. When the design serves a persona who is not the requester, the default before committing production design is a 15-minute walkthrough with one person of that persona — run against the production frontend once it exists (protocol in `references/user-probes.md`) — or a recorded §12 bet naming why not and its cost-of-being-wrong.
 
 ## Critical rules
 
 - Checkpoints are hard stops. Never proceed on assumption.
 - Checkpoint messages lead with the decision needed, in one plain-language sentence, in the requester's language, and fit on a phone screen before any table. Tier codes, gate names, and persona jargon stay in the artifacts — sign-off from someone who didn't parse the message is a rubber stamp, not a gate.
+- The checkpoint message itself carries everything needed to decide — the framing, the evidence weak spots, the verdict and its reason — in chat. Sign-off must never require opening an artifact; the files are the record, the message is the presentation.
+- Checkpoint questions use the requester's vocabulary. A question that needs a glossary to parse (accounting methods, tier codes, design jargon) is not a requester question — either translate it into its concrete consequence for their operation, or decide it yourself as the designer (one opinionated default) and present the decision for veto.
+- Discovery frames the whole problem and designs the whole solution. Build slicing and appetite bound implementation order, never the thinking — a discovery scoped to "slice one" produces a design that can't see past its first increment.
 - Requester statements are data: capture them verbatim in `requester-input.md`; later claims cite them.
 - Every external claim a decision rests on: source, or [UNVERIFIED] + verify.
+- Domain distinctions the design leans on (an account model, a settlement mechanic, a policy boundary) cite `references/domain.md`, the backend's entities, or a requester answer — an uncited distinction is a question to ask, never a claim to assert.
+- When a checkpoint bounces hard — the requester rejects a direction, corrects a domain premise, or names a whole missing surface — the cause is an undefined unknown, not bad luck. Don't just patch the artifact: name which unknown produced the miss, which stage should have caught it, and encode it there (the corrections closing line) before continuing.
 - Personas come from `product-context.md`; every discovery disposes of all of them explicitly.
-- No code, no ASCII mockups in the discovery documents — conceptual descriptions only. (The lifecycle's throwaway `preview.html` is built after `DISCOVERY.md`, outside these documents.) Don't forget mobile.
+- No code, no ASCII mockups in the discovery documents — conceptual descriptions only; the design becomes visible in the production frontend (next lifecycle phase), not a throwaway mockup. Don't forget mobile.
 - Documents are scannable: structure over argumentation — rationale lives in its own section, never inlined where the UI builder reads.

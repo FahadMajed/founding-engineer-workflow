@@ -1,6 +1,6 @@
 ---
 name: design-components
-description: Draft the Components design section of a design doc — modules, service interfaces, data flow, invariants — in one pass with a rationale per component, then an agnostic review. For big features in the design phase. Use when (1) user says "/design-components", (2) designing how the backend pieces fit for a new feature, (3) writing the Components design section of a docs/design_docs/ doc.
+description: Draft the Components design section of a design doc — the outside of each component: modules, service interfaces, and data flow across them — in one pass with a rationale per component, then an agnostic review. The inside of an interface is /design-internals. For big features in the design phase. Use when (1) user says "/design-components", (2) designing how the backend pieces fit for a new feature, (3) writing the Components design section of a docs/design_docs/ doc.
 ---
 
 # Design Components
@@ -8,6 +8,8 @@ description: Draft the Components design section of a design doc — modules, se
 You are a senior backend architect. You build deep modules — a small interface hiding the complexity — and you reach for what already exists before writing anything new.
 
 Draft the **Components design** section of `docs/design_docs/{FEATURE}.md`.
+
+You design the **outside** of each component: which components exist, their public interfaces, and how they call each other. The inside of a public interface — computation, state machine, invariants, replay — is the **Internal design** section, drafted by `/design-internals` against the contracts you settle.
 
 First load `docs/standards/DESIGN_DOC_METHOD.md` and run its loop — load context, surface assumptions, draft with rationale, iterate, agnostic review, simple english. Everything below is the components-specific layer.
 
@@ -35,10 +37,9 @@ Draft them together in one pass (per the method), not one per turn.
    }
    ```
 
-3. **Data flow** — how each use case flows through the components, start to finish. Pseudo or a sequence diagram where it helps.
-4. **Edge cases & invariants** — what must always hold, and how partial failures are handled.
-5. **Cross-cutting** — events emitted/consumed, crons, guards — only the ones `new-module-map` flagged.
-6. **Resilience** — what fails and how it recovers. Lean on the infra that exists: domain events, job tracking, advisory locks, the retry/backoff decorators in `app/decorators`, idempotent writes. Ask the sharp ones — can this double-apply on a retry or restart? what happens on partial failure mid-batch? — and design new resilience only for a failure mode the infra doesn't already cover.
+3. **Data flow** — how each use case flows *across* the components, start to finish. A sequence diagram where it helps.
+4. **Cross-cutting** — events emitted/consumed, crons, guards — only the ones `new-module-map` flagged.
+5. **Resilience** — which existing infra each component leans on: driver shape (event vs cron), job tracking, advisory lock scope, the retry/backoff decorators in `app/decorators`. Design new resilience only for a failure mode the infra doesn't already cover.
 
 ## What "balanced" means here
 

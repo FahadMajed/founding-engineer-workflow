@@ -21,7 +21,7 @@ Proposal → [UX Discovery → Demo] → Design Doc → Plan Tests ∥ Build+Tes
 
 Every phase ends at a **gate**: present, think together, adjust, then continue. Gates aren't rubber-stamps — they're where your judgment shapes the output: redirect the backend design, critique or add a test scenario, raise the bar on implementation quality. The agent does the work between gates; you steer at each one. Never blow through a gate on assumption.
 
-**Appetite is a circuit breaker.** At every gate, state elapsed effort against the appetite set at intake. Past appetite the gate becomes a mandatory shrink-or-stop decision, recorded — never a silent continuation. One quietly swelling feature eats the capacity every other bet was counting on.
+**Appetite bounds build order, never the design.** At every gate, state elapsed effort against the appetite set at intake. Appetite sequences which slice ships first; it never shrinks what the design proposes — scope and deferral are the requester's call, made after they see the whole design. Past appetite the gate becomes a build-scope decision the requester makes, recorded — never a silent continuation, and never a silent shrink of the design.
 
 ### 0. Intake — the proposal
 
@@ -32,7 +32,7 @@ A big feature enters on a filled proposal (`docs/proposals/{slug}.md`) with the 
 | Step          | Skill             | Output                                     |
 | ------------- | ----------------- | ------------------------------------------ |
 | UX Discovery  | `/ux-discovery`   | `docs/discovery/{feature}/` tree           |
-| Build Demo    | `/frontend-build` | Working UI with mock data                  |
+| Build frontend | `/frontend-build` | Production UI on mock data (the demo)     |
 | Feedback      | Manual            | Comments, questions, adjustments           |
 
 **Purpose:** see real UI instead of abstract specs; let the actual data needs surface the API shape; catch UX issues before backend work begins. Mock data, no API dependencies, fast iteration.
@@ -47,7 +47,8 @@ Written section by section, not freehand. The method lives in `DESIGN_DOC_METHOD
 - **Technical** — each its own skill, each with its own fresh-eyes review:
   - `/design-schema` — entities, keys, indices, constraints, migrations
   - `/design-api` — endpoints, request/response shapes, domain errors
-  - `/design-components` — modules, service interfaces, data flow, invariants
+  - `/design-components` — the outside: modules, public interfaces, data flow across them
+  - `/design-internals` — the inside: computations, state machines, invariants, replay, windows (N/A for CRUD)
 - **Tail** — Implementation Details, Assumptions, Milestones, Glossary.
 
 Each technical section runs the same loop: load context → draft with a one-line *why* per element → iterate with you → **agnostic review** by a fresh agent (`/analyze-design` + a simplicity/fit pass) → write it in.
@@ -101,8 +102,8 @@ Append the feature's row to the outcomes register: metrics with baselines, falsi
 
 UX-first across both repos with three hard checkpoints, so divergence is caught at the cheap stage:
 
-1. **UX** — `/ux-discovery-lite` + a throwaway HTML preview → sign-off before production UI.
-2. **Frontend** — a demo built on mock data → sign-off before backend design.
+1. **UX** — `/ux-discovery-lite` → sign-off on the direction before the frontend is built.
+2. **Frontend** — the production frontend on mock data → sign-off before backend design.
 3. **Backend design** — a 3-section short design doc (data, API, components) → sign-off before backend code.
 
 Then build → two-agent tests → wire the UI to the real API → visual verify → two PRs.

@@ -55,6 +55,8 @@ Decide which kind of break it is:
 - **Infra** — deploy, instance, DB capacity. → escalate with the infra detail.
 - **Expected / not-our-problem** — propose an Ignore row (needs human OK).
 
+**Transient vs consistent — earn the "transient" label.** "Transient" means *this same account/entity already recovered on an adjacent run* — not that the failure count is low, and not that other accounts are fine. Prove it: pull the per-entity, per-run outcome and look for a clean run after a failed one. A signature that has failed *every* run since it first appeared is a regression, not a blip — compare its first-seen time to the last deploy, and treat a fresh-since-deploy failure as an internal bug, never a blind retry.
+
 Never act before classifying — the fix for each kind is different.
 
 ## Step 4 — Act or escalate (confirm first)

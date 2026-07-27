@@ -37,6 +37,7 @@ If a filled proposal exists (`{{root}}/docs/proposals/{slug}.md`), ingest it as 
 - **Workaround:** "What do you do today instead — spreadsheet, a chat thread, the portal, nothing?" ("nothing" = weak push, predicts non-adoption)
 - **Outcome:** "If this were solved, what changes in the numbers — not the feature?"
 - **Tried without software?** SOP, checklist, existing tool — what happened?
+- **Unknown-knowns harvest:** "What about this domain feels too obvious to mention — the thing I'd get wrong?" And when the requester struggles to describe what they want: "Point me at an existing screen or tool you rate for this job."
 
 Those probes fit a problem-shaped ask (damage accumulating now). An opportunity-shaped ask (value not yet captured) swaps the incident probe for the demand-signal probe: "what signal says this demand is real and capturable — the records already exist on another channel, a comparable account does it there, the category grows on the target channel?" Asserted upside fails exactly the way an incident-less problem does (`framing.md`, the two shapes).
 
@@ -48,6 +49,8 @@ For adjustments to existing functionality, read the code **the requester points 
 
 ### Step 3 — Challenge & verdict
 
+Before challenging, run a **web sweep** scaled to lite — model memory of competitors, channels, and users is a prior, not a source (per the shared `evidence.md`). Derive 1–3 search angles from the feature's own context — how comparable tools handle the same job, the channel's official mechanics, a number the framing leans on — whatever this feature actually raises, not a fixed list. A few searches per angle, fetch the promising hits; findings enter the doc cited (source + date) or as "nothing found". Skipping the sweep takes a written reason in the doc. The next bullets rest on it: "is there a simpler approach / an existing tool" can't be judged from memory.
+
 - Restate the problem in your own words, no reference to the proposed solution. It must pass the **binary test**: names a role, a concrete moment it bites, and the cost — zero UI nouns (full ban list in `framing.md`). BAD: "there's no way to quickly select all accounts." GOOD: "an operator presented a client an Overview showing a third of real revenue — a filter had persisted from a prior session — and the client questioned the numbers before the operator found the cause; the cost is trust burned in the one meeting that exists to build it."
 - Is there a simpler approach? What's the minimum that achieves the outcome? Could a process or an existing tool do it?
 - Who else is affected — run the **role disposal line** across every persona (designed-for / out of scope because / degraded-and-accepted / N/A). A shared surface change that never considers the customer or client seeing it is a defect.
@@ -55,12 +58,12 @@ For adjustments to existing functionality, read the code **the requester points 
 
 ### Step 4 — Design
 
-Load `design-judgment.md` and `domain.md` from that same shared `references/` directory; apply the lenses the feature implicates and skip the rest silently — an N/A row is noise. (A single column implicates the decision test, states, and the peak/primary-language passes; it does not implicate queue completability or the recommendation five-pack.) Match existing product patterns; label each element convention (name the pattern) or invention (justify it).
+Load `design-judgment.md` and `domain.md` from that same shared `references/` directory; apply the lenses the feature implicates and skip the rest silently — an N/A row is noise. (A single column implicates the decision test, states, and the peak/primary-language passes; it does not implicate queue completability or the recommendation five-pack.) Three lenses that lite features implicate more often than they look: **view derivation** (`view-archetypes.md` — does the ask's question-shape want a different view-shape than the one requested?), **surface disposition** (which existing screens gain an entry point or a column from this — one line each), and **rabbit holes** (any under-specified piece that could balloon — patch, cut, or spike it before the verdict). Match existing product patterns; label each element convention (name the pattern) or invention (justify it).
 
 - **User flow** — entry → key steps → completion; keep it brief.
 - **IA** — primary / secondary / tertiary, each passing the decision test.
 - **Key interactions** — inputs, feedback, defaults.
-- **Edge cases** — domain-first (stale syncs, shared accounts, partial channel data, thin volume); generic empty/error/loading last. This section is mandatory.
+- **Edge cases** — domain-first (stale syncs, shared accounts, partial channel data, thin volume, a single-tenant universe on scope-dimensioned surfaces — frontend-build `reference/single-tenant.md`); generic empty/error/loading last. This section is mandatory.
 - **Content** — bilingual-first, if the feature has user-facing text.
 
 ### Step 5 — Output
@@ -83,6 +86,9 @@ Tier check: [each escalation trigger → yes/no; any yes carries the requester's
 
 ## What the requester told us / what we assumed
 [3–6 bullets, tiers visible. Assumptions that the design leans on carry a named test or an explicit bet.]
+
+## What the outside world does
+[Web-sweep record: the angles chosen, then per angle the cited finding (source, date) or "nothing found". Borrowed patterns note what they assume. A skipped sweep states its reason here.]
 
 ## Solution
 [What we're building — and what it deliberately does NOT do, for whom, and why that's acceptable.]

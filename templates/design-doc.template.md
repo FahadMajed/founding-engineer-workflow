@@ -97,12 +97,27 @@ Document all contracts:
 
 ### Components Design
 
-Provide the big picture:
+The **outside** — how the pieces fit:
 
-- List major components and responsibilities
-- Algorithms and processing logic
-- Edge cases and invariants
-- Sequence diagram(s)
+- Major components and responsibilities
+- Public interfaces and signatures
+- Data flow across components — a sequence diagram where it helps
+- Cross-cutting: events, crons, guards (only what the feature needs)
+
+---
+
+### Internal Design
+
+The **inside** of those interfaces — include only when the feature computes a persisted/judged value, has a lifecycle, can run the same work twice, has rules that can disagree, or has a window. Otherwise write `N/A — CRUD over existing entities` and move on.
+
+- Internal collaborators — private classes, one line + signature each
+- State machine — transition table, terminal and illegal transitions (where state exists)
+- Computations — formulas, thresholds with units, rounding, tie-breaks, precedence when two rules disagree
+- Edge semantics — 0 vs null vs empty, below-floor, empty set
+- Invariants — what must always hold, especially where a break is silent
+- Failure & replay — idempotency, dedup key, what a re-run over the same window produces
+- Time & windows — which clock/timezone, edges inclusive or exclusive, late-arriving rows
+- Not handled — the deliberate internal non-handling, one line each
 
 ---
 

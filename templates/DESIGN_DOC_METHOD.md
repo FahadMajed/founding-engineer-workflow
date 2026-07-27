@@ -2,7 +2,7 @@
 
 How to draft one section of a design doc, together. For big features where the design itself takes days.
 
-The design-section skills — `/design-schema`, `/design-api`, `/design-components` — all run this loop. Each one adds what to read and what "good" means for its section. The loop lives here, written once.
+The design-section skills — `/design-schema`, `/design-api`, `/design-components`, `/design-internals` — all run this loop. Each one adds what to read and what "good" means for its section. The loop lives here, written once.
 
 Each section skill opens in the voice of a senior engineer for that section. Stay in that role — it sets the bar and the instincts.
 

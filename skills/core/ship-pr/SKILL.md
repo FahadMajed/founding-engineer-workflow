@@ -61,7 +61,7 @@ All in parallel, after the PR exists. Each agent gets: PR number, repo, base bra
 
 - **security-reviewer**
 - **design-reviewer**
-- **conventions-reviewer**
+- **conventions-reviewer** — for a **frontend** PR it reviews against the frontend references (`frontend-build/reference/`), never the backend ones: a React diff checked against backend references produces confident nonsense. A PR touching both stacks gets each set of files checked against its own references.
 - **bug-hunter** — also gets the specified behavior (feature intent / design doc / scenarios doc) and the test writer's gap report. It runs after tests are written — that's precondition 2, so at PR time it always can.
 - **data-migration-reviewer** — only if the diff touches `src/migrations/`, entity schemas, or repository queries.
 
@@ -74,7 +74,7 @@ Each agent posts its own inline comments (prefixed `**[agent-name]**`) and a "no
 | Exploitable: scoping, authz, injection, secrets, webhooks | security-reviewer |
 | Wrong behavior vs spec, edge cases, prod failure modes | bug-hunter |
 | Structure: module depth, layering, duplication, house-pattern adaptation | design-reviewer |
-| What code says + house-way conformance (full build-feature/references) | conventions-reviewer |
+| What code says + house-way conformance (backend `build-feature/references`, or `frontend-build/reference` for a frontend PR) | conventions-reviewer |
 | Schema/query safety at prod data volume | data-migration-reviewer |
 
 Tiebreakers the defs carry: missing guard/tenant scope = security (exploitable); guard shaped wrong but safe = conventions. Schema conventions = conventions; schema safety = data-migration. Bad name from bad structure = design, as one finding. Two agents commenting the same line means one left its lane — note it when triaging.

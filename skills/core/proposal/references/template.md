@@ -67,7 +67,7 @@ Examples:
 Appetite set here, jointly: how much time we're willing to spend if we do this. Then decide — and whatever the decision, the author hears the reason. A "not now" archives the proposal here (no tracking ticket) and lands as a `not now (Gate 1)` row in `DECISIONS.md` with its reopens-when condition; re-raising it takes one new piece of evidence.
 
 - **Strategy bet:** (which current bet — from the live strategy pages — this advances, or "maintenance"/"none")
-- **Appetite:**
+- **Appetite:** (hours or days — build cycles run 1–2 days at agentic cadence; appetite bounds the first shippable slice, never the discovery's thinking)
 - **Decision:** shape now / send back for more / not now
 - **Reason:**
 - **Reopens when:** (for not now / send back)

@@ -39,8 +39,8 @@ Messaging-channel response rates run roughly double email's, and asking right af
 ### Switch interview — on every churn, uninstall, or downgrade, no exceptions
 At a small account population each loss is a large share of revenue and the single most information-dense event the company has; "interview 100% of losses" is a real policy here, not aspiration. Reach out fast (days, not weeks), 15 minutes, timeline of the actual decision: first thought → passive looking → active looking → the switch moment → first use of the alternative. Analyze with the four forces (push / pull / habit / anxiety). Never argue, never win-back mid-interview — the price of the truth is not trying to reverse it in the room.
 
-### Prototype walkthrough — the preview.html earns its keep
-15 minutes with one person of the target persona: hand them the preview and a real task ("find which account needs you today"), then silence. Record where they hesitate, what they say first, what they never notice. Never: a guided tour, "as you can see", or asking whether they like it. One walkthrough converts a stack of T5 design assumptions into T1 observations for the cost of a single message.
+### Prototype walkthrough — the production frontend earns its keep
+15 minutes with one person of the target persona: hand them the running frontend and a real task ("find which account needs you today"), then silence. Record where they hesitate, what they say first, what they never notice. Never: a guided tour, "as you can see", or asking whether they like it. One walkthrough converts a stack of T5 design assumptions into T1 observations for the cost of a single message.
 
 ### Buy-a-feature — forced trade-off instead of importance ratings
 Give the customer a constrained budget (100 units of {{YOUR_CURRENCY}} play money) across 5–8 candidate struggles priced by rough effort. The constraint defeats politeness — they cannot politely fund everything. One participant yields a full preference ordering, so 5–8 participants give a stable picture. Results rank opportunities for further discovery; they are not a build order.

@@ -41,8 +41,11 @@ Implement features following established patterns.
 
 ### 3. Build (per slice)
 
-1. Implement the slice on its stack branch.
-2. Verify with `npm run build` & `npm run lint` — that is the full extent of build-step verification.
+1. Implement the slice on its stack branch. Keep `docs/for_ai/plans/{FEATURE}_implementation_notes.md` alongside the immutable plan: when reality forces a call the design doc didn't specify, split by blast radius — a choice that changes **scope, contract, or behavior** goes back to the requester as a one-line question; an **implementation-detail** ambiguity gets the *conservative* option, logged under `## Deviations` with one line of why. Never silently change direction. The notes ride into the PR body's What/Why and are what the plan-vs-shipped diff reads.
+2. Verify (scripted — run, don't eyeball):
+   - `npm run build` && `npm run lint` green.
+   - `bash scripts/verify-feature.sh` — static checks build/lint don't do: no `any` added (the CRITICAL rule, made checkable), and a warning when entity schema decorators change with no migration (the silent prod-drift killer). Extend the script when a new failure mode turns out to be mechanically checkable — capture what's verifiable so a future slice can't repeat it.
+   - When the diff touches migrations: `npm run migration:show` to confirm the pending set is what you expect (migrations are tracked by class name, not filename).
 3. Do NOT write a manual test plan. The slice's tests come from the two-agent split: if the caller already produced a scenarios doc (e.g. sdlc's plan-tests step), skip Agent A and spawn only `/write-tests` (fresh agent B) against it for this slice's behavior; otherwise run both `/plan-tests` and `/write-tests` as fresh sub-agents yourself. Functional review comes from the PR sweep in step 4.
 
 ### 4. Ship (per slice) — /ship-pr
