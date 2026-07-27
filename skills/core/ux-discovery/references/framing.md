@@ -27,6 +27,23 @@ Requests arrive as attributes ("add a bulk price editor"). Record three rungs be
 **ATTRIBUTE** (the request, verbatim) → **CONSEQUENCE** ("what did not having it cost, in the last concrete instance?") → **STAKE** ("what did that put at risk — the customer relationship, the sale, the margin?").
 The problem statement is written at rungs 2–3. The request itself is parked as candidate #1, restated as a hypothesis, and must compete in ideation like any other concept.
 
+## The mechanism chain — which rung the verdict targets
+
+The ladder runs *upward* from the request to the stake. This runs *downward* from the incident: take the core incident and chain the mechanism one layer at a time — each rung answers "and what makes *that* happen?"
+
+**The stopping rule is evidence, not a count.** Stop at the last rung a T1–T3 source supports; the first rung you can only guess at is written `[UNVERIFIED]` and becomes an assumption-map row, never a link you reason from. Two or three rungs is normal. A five-rung chain on a two-rung evidence base is fiction, and fiction at the bottom of the chain is what a verdict then gets built on.
+
+Then name **which rung the verdict targets** — that choice *is* the verdict. One incident, three intervention points:
+
+> "A channel listing rejection surfaces days later through a client message"
+> ← nobody opens the channel's panel daily [T1, operator interview]
+> ← listing status isn't synced into the system [T1, backend]
+> ← the channel's status endpoint was never integrated [UNVERIFIED]
+
+Target rung 1 → a checklist SOP ("solve another way"). Rung 2 → surface the status already synced ("build"). Rung 3 → a spike before anything ("probe first"). The chain doesn't pick for you; it makes the pick explicit and shows what the unpicked rungs would have cost.
+
+Two failure modes to name: **forcing one line** when the incident has two independent causes — write both branches rather than picking the tidier one; and **chaining past the evidence to reach a rung you already wanted to build on**, which is the same defect as an uncited domain claim, wearing a causal costume.
+
 ## Outcome gate (before any ideation)
 
 One sentence: **whose behavior changes, from what to what, observable how.** "Increase revenue" fails (not directly movable); "have a page for X" fails (an output). Then classify — measurable now / measurable later / judgment bet — and name one signal watchable starting today.
@@ -52,7 +69,7 @@ Dispose of every persona (from `product-context.md`) at framing time — whose p
 Checkpoint 1 must end with one — aligned with the proposal's Gate 1:
 
 - **Build** — evidence clears the bar and the outcome is worth the appetite.
-- **Shrink** — build only the evidenced kernel; name what falls away.
+- **Shrink** — the *requester* chooses to build only the evidenced kernel; you name what the full version would be and what falls away, they draw the line. Never pre-shrink the design yourself to fit appetite — design full, present, let them cut.
 - **Probe first** — a specific cheap test, then re-decide. A Probe ships as a plan, not a wish: write `docs/discovery/{feature}/probe-plan.md` — the test card plus instrument, owner, sample, deadline, and threshold. Desk-shaped probes run before the session ends where the tools allow: a prod query (the backend repo's observability/local-testing skills), {{YOUR_ANALYTICS}}, {{YOUR_SOURCE_REVIEWS}}, task-tracker capture mining. Customer-facing probes take their instrument from `user-probes.md`. Anything not runnable now becomes a tracked task carrying the deadline — an open probe past its deadline is a defect the decision ledger makes visible.
 - **Solve another way** — an SOP or process change, an existing tool or partner (an off-the-shelf system instead of building one), or the manual service doing it. If the ask reveals a company-direction call — a new capability, a fixed cost, a strategic line — say it belongs to the founders, not a feature pipeline.
 - **Not now** — real, but the outcome doesn't justify the appetite. Say it plainly — and give it a door: name what would change the verdict (a threshold crossed, a second account hit, a probe result). The proposal stays archived in `docs/proposals/`; no tracking ticket. Re-raising requires at least one new piece of evidence, so persistence alone never beats evidence — and the requester hears the reason and the reopening condition, not just the no.
@@ -77,6 +94,7 @@ The ticked block is appended to the end of `00-framing.md` — gates live in the
 - [ ] Core-claim gate met for its shape: problem → interrogated first-party T1–T3 incident; opportunity → T1–T2 demand signal — with provenance
 - [ ] Evidence table complete: tier, provenance, sampling caveat, consequence per load-bearing claim; ledger checked (entries cited by ID, or "no prior evidence" stated)
 - [ ] The requester's ask restated as a hypothesis, laddered to consequence and stake
+- [ ] Mechanism chain written from the core incident, each rung tiered (stopped at the evidence, not padded); the targeted intervention rung named, and the verdict is the one that rung implies
 - [ ] Outcome gate passed, with one watchable signal named
 - [ ] Frequency × breadth × cost stated with real numbers
 - [ ] All personas disposed

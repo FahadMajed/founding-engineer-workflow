@@ -25,6 +25,10 @@ Design doc path from user.
 
 Understand the business requirements and user flows. Focus on WHAT the system should do, not HOW.
 
+Derive your scenarios from the **Use Cases** and **Business Rules** — that's what the system does for someone.
+
+The **Internal design** section is written for the implementer. It sharpens scenarios you derived from behavior; it never generates one of its own. Step 6 governs what it may and may not contribute.
+
 ### 2. Read Testing Standards
 
 Check `docs/standards/TESTING_STRATEGY.md` for:
@@ -106,6 +110,19 @@ Two rules while writing:
 
 - Tag each assertion mentally: stated (in the doc), inferred (you reasoned it), or unspecified (doc is silent). Stated → assert freely. Inferred → assert, note the basis. Unspecified → do NOT invent an authoritative answer; record it under Assumptions & Open Questions and pick a labeled assumption for the test.
 - A test's title must match its own THEN. If the title says "Healthy" and the assertion says "Slipping", one is wrong.
+
+### 6. Internal design — values, never scenarios
+
+Its structure is the implementation's structure. A scenario list shaped like it is a list that tests the build instead of the behavior — the thing this skill exists to prevent. So it acts on the scenarios you already have. Two uses only:
+
+1. **Pin the boundary values.** Your scenario says "below the sample-size floor"; that section says 20 orders in 30d. Same for window edges (inclusive or exclusive), rounding, timezone, and which rule wins when two disagree. Vague scenario → exact scenario.
+2. **Completeness.** Does it name an observable edge you missed — 0 vs null, a replay, a precedence conflict? Add a scenario. Add it because a user can observe it, not because the section lists it.
+
+Hard limits:
+
+- **No test may name an internal collaborator**, assert a step ran in a given order, or check config read timing. Not observable through the API or the persisted row → not a scenario. (Same rule as the banned title terms above.)
+- **Not handled** is a stop sign. Never write a test asserting the system does something the design deliberately excluded.
+- If a value there contradicts Business Rules, that's a design-doc defect. Raise it; don't quietly test one of them.
 
 ## Final Step: QA Review, then prune
 

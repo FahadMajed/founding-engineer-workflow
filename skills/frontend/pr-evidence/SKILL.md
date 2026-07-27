@@ -62,28 +62,32 @@ git worktree remove ../fe-evidence
 
 ## Embed in the PR body
 
-Return this block to the caller (or `gh pr edit --body` it in yourself), with `BASE = https://raw.githubusercontent.com/{{YOUR_ORG}}/{{YOUR_REPO}}/pr-evidence/{folder}`:
+**GitHub cannot inline-render an image from a private repo via a URL.** Its image proxy (camo) fetches `raw.githubusercontent.com` / `blob?raw=true` **unauthenticated** → 404, so a Markdown `![](…)` embed shows a broken icon. If your repo is private, `![](raw…)` never works (it would, on a public repo). Two working paths, in order:
+
+**Default — clickable blob links (scriptable, reliable).** Reviewers with repo access click through to the image in GitHub's file viewer. Durable: the orphan `pr-evidence` branch never moves, so link to the branch (not a SHA) and re-captures serve automatically. Return this block (or `gh pr edit --body` it yourself), with `BASE = https://github.com/{{YOUR_ORG}}/{{YOUR_REPO}}/blob/pr-evidence/{folder}`:
 
 ```markdown
 ## Evidence
 | State | Screenshot |
 | --- | --- |
-| Empty | ![empty](BASE/{screen}-empty.png) |
-| Loading | ![loading](BASE/{screen}-loading.png) |
-| Error | ![error](BASE/{screen}-error.png) |
-| Populated | ![populated](BASE/{screen}-populated.png) |
+| Empty | [empty](BASE/{screen}-empty.png) |
+| Loading | [loading](BASE/{screen}-loading.png) |
+| Error | [error](BASE/{screen}-error.png) |
+| Populated | [populated](BASE/{screen}-populated.png) |
 
-**Key interaction:** ![flow](BASE/{flow}.gif)
+**Key interaction:** [flow GIF](BASE/{flow}.gif)
 
-**Before → after:** ![before](BASE/{screen}-before.png) ![after](BASE/{screen}-after.png)
+**Before → after:** [before](BASE/{screen}-before.png) · [after](BASE/{screen}-after.png)
 
 _Not captured: {state} — {screen has no such state / why}_
 ```
 
+**For inline thumbnails — drag-drop upload (human, browser only).** The one thing GitHub renders inline for a private repo is an **uploaded attachment**: dragging an image into the PR description mints a signed `https://github.com/user-attachments/assets/…` URL that renders as a thumbnail. This is not scriptable (needs the web session, not a PAT). So also **surface the local capture paths** to the caller — a human can drag those files into the PR body to upgrade the links above to thumbnails.
+
 ## Re-capture rule
 
-Evidence lies the moment the branch moves. Any commit touching UI code after capture → re-capture the affected shots, overwrite the **same filenames**, push the evidence branch again. The raw URLs in the PR body then serve the new images (GitHub caches ~5 min). Screens added or removed → update the PR body block too.
+Evidence lies the moment the branch moves. Any commit touching UI code after capture → re-capture the affected shots, overwrite the **same filenames**, push the evidence branch again. The blob links (pinned to the `pr-evidence` branch, not a SHA) then serve the new images. Drag-dropped attachments are frozen copies — they must be re-dragged. Screens added or removed → update the PR body block too.
 
 ## Output
 
-Evidence pushed, the markdown block, and the list of states not captured with why.
+Evidence pushed, the markdown block (blob links), the **local capture paths** (so a human can drag them in for inline thumbnails), and the list of states not captured with why.

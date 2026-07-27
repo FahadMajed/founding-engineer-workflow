@@ -154,6 +154,12 @@ Hover over every element in your UI. Ask:
 2. Does something change when I hover?
 3. If nothing changes, should this be interactive?
 
+## The Inverse: False Affordances
+
+The smell runs both directions. An element that is interactive but signals the *wrong* interaction is worse than one that signals none — it teaches the user a wrong model. A metric switcher styled like a sort toggle reads as "reorder this column"; a filter styled as tabs reads as "navigate to another view". The fix is never better styling of the wrong control — it's picking the primitive whose convention matches the action: view switch → the house segmented control/tabs; sort → the column-header affordance; filter → a filter control.
+
+Test: cover the labels. Would a user predict what this control does from its form alone? If the prediction is a different action, it's a false affordance.
+
 ## Check Yourself
 
 1. Every `onClick` has a corresponding visual affordance
@@ -161,3 +167,4 @@ Hover over every element in your UI. Ask:
 3. Icon actions are wrapped in `Button` or have clear interactive styling
 4. Links are visually distinct from surrounding text
 5. Disabled elements look different from enabled ones
+6. No control's form implies a different action than it performs (see False Affordances)

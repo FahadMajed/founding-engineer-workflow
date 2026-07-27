@@ -17,7 +17,7 @@ From the main agent: PR number, repo, base branch, head SHA.
 - Backend PR — the conformance contract is the **whole** of `.claude/skills/build-feature/references/`:
   - Always read in full: `conventions.md`, plus `docs/standards/CODING_STANDARDS.md`.
   - Then route with `new-module-map.md`: for every area the diff touches, open the governing reference and check the diff against it — `architecture.md` (module structure), `data-access.md` (repository/transaction idioms), `permissions.md` (guard stack, Resource/Action), `events.md` (emit/consume shapes), `crons-and-sync.md` (@RunEvery, SyncType), `entities-and-migrations.md` (EntitySchema, column types, audit enums). Anything the diff does that a reference governs gets checked against that reference — when in doubt, open it.
-- Frontend PR: the frontend CLAUDE.md + `.claude/skills/frontend-build/` instead.
+- **Frontend PR:** review against the frontend's own conventions — the frontend CLAUDE.md + `.claude/skills/frontend-build/reference/` — never the backend references above. They govern a different stack, so conformance findings drawn from them on a React diff are confident nonsense. A PR that touches both stacks gets each set of files checked against its own stack's references.
 
 ## Review Scope
 

@@ -19,7 +19,8 @@ Converts test scenarios into actual E2E tests. Runs after `/plan-tests` (creates
 3. Detect gaps (see below)
 4. Write test file following patterns in `references/test-patterns.md`
 5. Run tests: `npm test -- --testPathPattern="file.e2e.spec.ts" --testNamePattern="Suite" --no-coverage 2>&1`
-6. Report: pass/fail count, any gaps found
+6. Verify convention alignment (scripted — a violating test still goes green): `bash scripts/verify-feature.sh` flags mocking an internal service/repository, asserting on call counts instead of the contract, a missing `describe`, and non-`*.e2e.spec.ts` naming. Fix the warnings or justify each.
+7. Report: pass/fail count, any gaps found
 
 ## Test through the contract
 

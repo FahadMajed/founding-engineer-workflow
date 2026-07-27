@@ -1,6 +1,6 @@
 ---
 name: adhoc-fullstack-feature
-description: Drives a feature that spans the backend repo and the frontend repo, UX-first across both. Runs /ux-discovery-lite with a cheap HTML preview → a frontend demo → a short backend design doc, with a hard user-alignment checkpoint after each before any production code; then builds the backend, runs the two-agent test split, wires the UI to the real API, verifies the flow visually, ships two cross-linked PRs. Use when (1) user says "/adhoc-fullstack-feature", (2) a feature needs both an API and a UI, (3) it's hours of work across both repos, not days.
+description: Drives a feature that spans the backend repo and the frontend repo, UX-first across both. Runs /ux-discovery-lite → a production frontend with mocked API → a short backend design doc, with a hard user-alignment checkpoint after each before any production code; then builds the backend, runs the two-agent test split, wires the UI to the real API, verifies the flow visually, ships two cross-linked PRs. Use when (1) user says "/adhoc-fullstack-feature", (2) a feature needs both an API and a UI, (3) it's hours of work across both repos, not days.
 ---
 
 # Adhoc Fullstack Feature
@@ -19,8 +19,8 @@ Two repos → two branches → two PRs, cross-linked. Run each repo's build/lint
 Stop at each and get the user's explicit sign-off before the next phase. They exist so divergence
 gets caught at the cheap stage, before a wrong assumption is built end to end.
 
-1. **UX** — after discovery + the HTML preview, before any production UI. When the design serves a persona who is not the requester, the default here is a 15-minute walkthrough of `preview.html` with one person of that persona (protocol: `.claude/skills/ux-discovery/references/user-probes.md`) — or a recorded bet in the doc's Design Decisions naming why not and its cost-of-being-wrong.
-2. **Frontend** — after the demo UI, before backend design.
+1. **UX** — after discovery, on the direction (framing, flows, IA), before the demo is built.
+2. **Frontend** — after the demo UI, before backend design. When the design serves a persona who is not the requester, the default before this sign-off is a 15-minute walkthrough of the running frontend with one person of that persona (protocol: `.claude/skills/ux-discovery/references/user-probes.md`) — or a recorded bet in the doc's Design Decisions naming why not and its cost-of-being-wrong.
 3. **Backend design** — after the design doc, before backend implementation.
 
 Never proceed past a checkpoint on assumption. If the user redirects, fold it in and re-confirm. At each checkpoint, state elapsed effort against the verdict's appetite; past appetite, the checkpoint becomes a shrink / stop decision recorded in `docs/proposals/DECISIONS.md`, not a silent continuation.
@@ -45,7 +45,7 @@ multi-day / design-heavy scope, switch to `/ux-discovery` → full design doc �
 
 ## Workflow
 
-### 1. UX discovery + HTML preview — main session
+### 1. UX discovery — main session
 
 Load `/ux-discovery-lite` (it lives in the frontend repo's `.claude/skills/`). If the input is a
 shallow sentence with no proposal behind it, the skill's intake runs the proposal probes first (the
@@ -57,33 +57,37 @@ reach a verdict, quick design. Write to
 If the verdict lands on probe / solve another way / not now, stop there and present that deliverable —
 a successful outcome, not a failed run.
 
-Then build a cheap, low-fidelity **HTML mockup** of the key screen(s) and states — throwaway, not
-production code — so the UX is visible before any engineering effort goes into the real frontend.
-Save it to `docs/discovery/{feature-name}/preview.html` and render it inline for the
-user (the visualize widget works well for this).
+→ **CHECKPOINT 1 (UX):** walk the user through the design — framing, direction, flows, IA — in chat.
+Get sign-off on the direction before building the frontend. No throwaway mockup: the design becomes
+visible in the production frontend (next step), built in the real app.
 
-→ **CHECKPOINT 1 (UX):** walk the user through the design and the HTML preview. Get sign-off before building production UI.
+### 2. Frontend — `/frontend-build` (production frontend, mocked API), main session
 
-### 2. Frontend demo — `/frontend-build`, main session
-
-Load `/frontend-build` against `DISCOVERY-LITE.md` + the approved preview, operating in the frontend
-repo. Component inventory gate (shadcn first), build with craft, polish pass, design-smell scan, i18n
+Load `/frontend-build` against `DISCOVERY-LITE.md`, operating in the frontend
+repo. Prior-art & capabilities sweep gate (shadcn-first), build with craft, polish pass, design-smell scan, i18n
 keys, responsive (check the narrow breakpoint).
 
-Demo mode: a typed service returning mock data shaped to what the UX needs (`// TODO: Replace with
-real API`). This is a first cut — the real API shape is settled in step 3, not here.
+Mocked API: a typed service returning mock data shaped to what the UX needs (`// TODO: Replace with
+real API`). The shapes seed the backend contract — extract them into the feature's `contract-draft.md`
+at the checkpoint (per `/frontend-build`'s gate handoff), checked against the API conventions; step 3
+consumes the draft and owns the final contract, so nothing the backend must build gets faked away here.
 
 From the frontend root: `npm run build && npm run lint`
 
-→ **CHECKPOINT 2 (Frontend):** show the user the running demo UI. Get sign-off before designing the backend.
+→ **CHECKPOINT 2 (Frontend):** show the user the running frontend. Get sign-off before designing the backend.
+The checkpoint message carries the implementation-notes disclosures (decisions the user didn't specify;
+deviations, conservative option taken) — stated as empty when empty, plain language.
+Feedback rounds after this checkpoint re-enter `/frontend-build` + `/chrome-verify` — reload the skills
+for the round; every correction is treated as a class (sweep the feature for siblings before replying).
 
 ### 3. Backend design doc — main session
 
 Read first: your engineering principles (PHILOSOPHY.md) + `.claude/skills/build-feature/references/`. Then write `docs/design_docs/{FEATURE}.md` following `docs/design_docs/TEMPLATE.md`, but only these three sections:
 
 - **Data design** — entities, keys, schema diffs, constraints, indices, access patterns, migration/backfill (idempotent).
-- **API design** — endpoints, request/response schemas, domain errors. Owner/tenant-scoped params; JSON shapes mirroring the schema; static labels as translation keys; a consistent empty-data envelope where it applies. This is the real contract — heavy backend influence, aligned to the approved UX + demo.
-- **Components Design** — backend modules/services/interfaces touched, data flow, edge cases, invariants.
+- **API design** — endpoints, request/response schemas, domain errors. Owner/tenant-scoped params; JSON shapes mirroring the schema; static labels as translation keys; a consistent empty-data envelope where it applies. Consumes the frontend's `contract-draft.md` as the seed; this is the real contract — the backend owns it and adjusts freely, recording each divergence from the draft so step 6 adapts the frontend mechanically.
+- **Components Design** — backend modules/services/interfaces touched, data flow across them.
+- **Internal design** — only if the feature computes a persisted/judged value, has a lifecycle, can run the same work twice, has rules that can disagree, or has a window. Then: computations, edge semantics, invariants, replay, windows, not-handled. Skip anything `build-feature/references/` already answers. Most adhoc work skips this section entirely.
 
 Skip the template's other sections (Overview, Existing Solution, Use Cases, Alternatives, Open
 Questions, etc.). Find a similar existing endpoint and mirror it.
@@ -112,9 +116,10 @@ Exception: external-service-heavy (test would be 90% mocks) → skip both, call 
 
 ### 6. Wire the frontend to the real API — main session
 
-Replace the demo service with the real api-client call against the design doc's API section. Where the
-demo's assumed shape and the real API don't line up, adjust the frontend types or the API to match —
-wiring is where the shape settles. Keep an analytics event on every state-changing action.
+Replace the demo service with the real api-client call against the design doc's API section. The
+recorded divergences from `contract-draft.md` are the work list — adapt the frontend to each. A
+mismatch that isn't recorded is a design-doc defect: fix the doc first, then wire to it (the doc
+stays the source of truth). Keep an analytics event on every state-changing action.
 
 From the frontend root: `npm run build && npm run lint`
 

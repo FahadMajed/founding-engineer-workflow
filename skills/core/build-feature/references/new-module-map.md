@@ -28,3 +28,4 @@ Each "yes" pulls in a domain reference.
 | Scheduled jobs, cron tracking, sync types, advisory locks | [crons-and-sync.md](crons-and-sync.md) | the sync-job service |
 | Repository, queries, transactions, locks | [data-access.md](data-access.md) | a `<module>.repository.ts` |
 | DTO, validation, pagination, error shape | [conventions.md](conventions.md) | a `<module>.dto.ts` |
+| Base class where only *some* subclasses support an operation | [optional-capabilities.md](optional-capabilities.md) | an adapter with a nullable capability getter |

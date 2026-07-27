@@ -25,7 +25,9 @@ Also check (all in the project repo, whatever the cwd): `docs/discovery/{feature
 
 ### Step 2 — Understand the need (1–3 questions, then STOP)
 
-Restate the ask as an ownerless hypothesis ("someone believes this feature needs X because Y") and probe the restatement, not the pitch. You know the feature; now interrogate the gap:
+Restate the ask as an ownerless hypothesis ("someone believes this feature needs X because Y") and probe the restatement, not the pitch. You know the feature; now interrogate the gap.
+
+**Ladder it yourself first — it costs no questions.** A touch arrives at its most solution-shaped ("add a column", "put a section here"), so record the three rungs from `framing.md` before asking anything: **ATTRIBUTE** (the ask verbatim) → **CONSEQUENCE** (what its absence cost in the last concrete instance) → **STAKE** (what that put at risk). Rungs 2–3 are what the verdict judges. A ladder that stalls at rung 1 — nothing behind the ask but the ask — is not a reason to ask a fourth question; it's the finding, and the honest verdict is usually **not now** with the rung-2 evidence named as its reopens-when.
 
 - What did users actually say or do — the last concrete instance, not the general theme? (Whose feedback: an operator's own work, a customer proxy claim, or the requester's read? Stamp the tier per the shared `evidence.md`.)
 - What decision or action should the addition enable?
@@ -42,7 +44,7 @@ One line first: **add / not now / solve another way** — a touch that changes n
 - **Role check** — if the surface is shared, run the every-persona disposal line: a column added for operators appears on every screen a customer or client sees. A touch that changes another persona's workflow escalates.
 - **Information** — primary / supporting; relation to data already on the page.
 - **Interactions** — defaults, controls; match the sibling components' existing patterns, name the pattern matched.
-- **Edge cases** — empty, extreme counts, and the domain's real ones (stale sync, partial channel data, "not supported on this channel"); does the feature degrade gracefully when the addition has no data?
+- **Edge cases** — empty, extreme counts, a single-tenant universe if the addition is scope-dimensioned (frontend-build `reference/single-tenant.md`), and the domain's real ones (stale sync, partial channel data, "not supported on this channel"); does the feature degrade gracefully when the addition has no data?
 - **Responsive + bilingual** — 375px behavior; both-language labels; RTL logical properties where the audience needs them.
 
 ### Step 4 — Record
@@ -63,3 +65,4 @@ The growing/declining sections added to a period-comparison report:
 - Read code first, always — the skill's value is grounding in what exists.
 - Design within the existing system: match patterns, reuse components, extend rather than reinvent.
 - Don't forget mobile; align with the branding — no generic components.
+- A touch born from pointed feedback is a class, not an instance: before designing, sweep the feature for siblings of the pointed gap (the same missing column on a sibling table, the same absent affordance on the sibling form of the surface) and fold them into the one touch — or name them and let the requester scope. A pointed defect fixed only where pointed comes back as next week's touch.
