@@ -41,6 +41,7 @@ Draft them together in one pass (per the method), not one per turn.
 2. **Request** — params and body; `{Verb}{Entity}Request` classes; validation. No cross-scope filter params when the scope guard already filters.
 3. **Response** — JSON shaped for the use case, field names faithful to the DB; translation keys for static labels; the empty-data envelope where data may be absent; dates as ISO strings.
 4. **Domain errors** — the failure cases each endpoint returns, and their shape.
+5. **Mutation safety** — for each endpoint that writes, state what a second identical call produces: the same result (idempotent), deduped by a named key, or rejected. Double submits, client retries, and webhook redelivery all reach prod (a third party redelivers on non-2xx, hours apart) — an endpoint that answers "creates a second row" is the design gap, not an edge case. A destructive or bulk write with real blast radius gets a `/preview` twin, so the caller sees what changes before it commits.
 
 Endpoints map to flows by name in the discovery doc — no separate use-case-mapping table.
 

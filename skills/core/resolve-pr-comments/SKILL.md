@@ -1,6 +1,6 @@
 ---
 name: resolve-pr-comments
-description: Triage and resolve PR review comments — from the /ship-pr review agents (security, design, conventions, bug-hunter, data-migration), from humans, or both. Verify each finding, fix or push back, reply on every thread. Use when user says "/resolve-pr-comments" or asks to resolve PR comments.
+description: Triage and resolve PR review comments — from the /ship-pr review agents (security, design, conventions, bug-hunter, sql-and-migration, perf), from humans, or both. Verify each finding, fix or push back, reply on every thread. Use when user says "/resolve-pr-comments" or asks to resolve PR comments.
 ---
 
 # Resolve PR Comments

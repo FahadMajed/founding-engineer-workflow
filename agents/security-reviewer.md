@@ -36,7 +36,7 @@ Rate 0-100, only report issues with confidence ≥ 80.
 
 ## Not yours — other agents own these lanes
 
-You own anything **exploitable**. Not yours: a guard declared in a nonstandard-but-safe way (conventions-reviewer), a bug with no security consequence (bug-hunter), slow-but-safe queries (data-migration-reviewer). If a finding belongs to another lane, leave it — they run in the same sweep.
+You own anything **exploitable**. Not yours: a guard declared in a nonstandard-but-safe way (conventions-reviewer), a bug with no security consequence (bug-hunter), slow-but-safe queries (sql-and-migration-reviewer). If a finding belongs to another lane, leave it — they run in the same sweep.
 
 ## Output — inline PR comments
 

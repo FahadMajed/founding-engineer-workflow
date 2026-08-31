@@ -1,6 +1,6 @@
 ---
 name: pr-evidence
-description: Capture visual evidence for a PR with frontend work — a screenshot per relevant state (empty, loading, error, populated), a GIF of the key interaction end to end, before/after where behavior changes — from the branch's final state, pushed to the pr-evidence branch and embedded in the PR body. Use when (1) /ship-pr or a workflow skill calls for PR evidence, (2) user asks to attach screenshots/GIFs to a PR, (3) UI code changed after evidence was captured (re-capture).
+description: Capture visual evidence for a PR with frontend work — a screenshot per relevant state (empty, loading, error, populated), a GIF of the key interaction end to end, before/after where behavior changes — from the branch's final state, pushed to the pr-evidence branch and embedded in the PR body. Use when (1) /ship-pr or a workflow skill calls for PR evidence, (2) user asks to attach screenshots/GIFs to a PR, (3) UI code changed after evidence was captured (re-capture). Capture doubles as the last QA pass: the drive is the only time the feature runs end to end.
 ---
 
 # PR Evidence
@@ -43,9 +43,27 @@ git worktree remove ../fe-before --force
 
 Name files by screen and state: `{screen}-empty.png`, `{screen}-error.png`, `{screen}-before.png` / `{screen}-after.png`, `{flow}.gif`.
 
-## Read what you shot
+## Capture is the last QA pass
 
-Read every screenshot (and GIF frames via a couple of extracted stills) before attaching. Wrong state, missing data, broken layout in the evidence = shipping the bug straight to the reviewer. Evidence showing a defect → fix first, re-capture.
+Driving the GIF is the only time anyone operates the feature end to end as a user. `/chrome-verify` shoots states, the sweepers read stills, `bug-hunter` reads code — nobody clicks the flow. So treat the drive as QA, not as filming. The findings are free here and expensive after merge.
+
+Read every screenshot (and GIF frames via a couple of extracted stills) before attaching. Wrong state, missing data, broken layout in the evidence = shipping the bug straight to the reviewer.
+
+**Watch the run, not just the frame.** What a still can't show, and the drive hands you for free:
+
+- console errors and failed requests — keep `page.on('console')` and `page.on('requestfailed')` printing for the whole run
+- a mutation that lands but leaves the table stale until reload
+- a toast that never fires, or fires twice
+- a step that needed a retry, a reload, or an extra click nobody would guess
+- layout shift and jank as data arrives
+- keyboard: the dialog traps focus, Esc closes, Enter submits
+
+Behavior, not pixels — `visual-sweeper` and `/chrome-verify` already reviewed the pixels, and re-litigating them at PR time is a second design review nobody asked for.
+
+**Then split by scope, and say which:**
+
+- **Defect in what this PR changed** → fix it, re-capture, then attach. Evidence is never where a known bug ships from.
+- **Defect outside the diff** → report it in the output and leave the PR alone. QA at capture time is not a license to widen the PR.
 
 ## Push — the pr-evidence branch
 
@@ -90,4 +108,4 @@ Evidence lies the moment the branch moves. Any commit touching UI code after cap
 
 ## Output
 
-Evidence pushed, the markdown block (blob links), the **local capture paths** (so a human can drag them in for inline thumbnails), and the list of states not captured with why.
+Evidence pushed, the markdown block (blob links), the **local capture paths** (so a human can drag them in for inline thumbnails), the list of states not captured with why, and the **QA verdict from the drive** — what broke, what you fixed and re-captured, what you found outside the diff and left. "Clean" is a verdict; silence isn't. `/ship-pr` reads that verdict, so it goes in the output every time.

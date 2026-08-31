@@ -43,6 +43,7 @@ Before looping, making repeated calls, or heavy operations, think: can one comma
 3. **Never half-finish** - Complete the task or say what's left.
 4. **No comment spam** - Only comment non-obvious business logic.
 5. **No over-engineering** - Solve what's asked, nothing more.
+6. **Ticket before code** - Any session that will produce a PR or change prod finds or creates its task in your tracker before the first line of code, never at ship time. A task opened after the PR is a receipt; one opened up front is what tracks the work while it happens. Reads, triage, and questions don't need one — only when the finding becomes work.
 
 ## Writing Tone
 

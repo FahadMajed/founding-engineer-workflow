@@ -5,8 +5,8 @@ The level of process scales with the size of the work. Three entry points, one s
 | Size                       | Entry point                | Design                      | Tests                | PRs |
 | -------------------------- | -------------------------- | --------------------------- | -------------------- | --- |
 | Big (days, API + UI)       | `/sdlc`                    | Full design doc, section-by-section | plan + write (2 agents) | 2   |
-| Medium (hours, API + UI)   | `/adhoc-fullstack-feature` | 3-section short design doc  | plan + write (2 agents) | 2   |
-| Small (hours, backend)     | `/adhoc-feature`           | None                        | plan + write (2 agents) | 1   |
+| Medium (hours, API + UI)   | `/scoped-fullstack-feature` | 3-section short design doc  | plan + write (2 agents) | 2   |
+| Small (hours, backend)     | `/scoped-feature`           | None                        | plan + write (2 agents) | 1   |
 
 It's collaborative, not autonomous. The agent moves fast between phases; you think with it at the boundaries. The goal is to ship fast *and* keep the code maintainable — because maintainable code is what keeps you fast.
 
@@ -53,7 +53,7 @@ Written section by section, not freehand. The method lives in `DESIGN_DOC_METHOD
 
 Each technical section runs the same loop: load context → draft with a one-line *why* per element → iterate with you → **agnostic review** by a fresh agent (`/analyze-design` + a simplicity/fit pass) → write it in.
 
-→ **GATE (Design doc).**
+→ **GATE (Design doc).** Render it with `/visual-gate` when the shape is what needs deciding — schema before/after, flows, the slice stack — and walk the page with the requester.
 
 ### 3. Plan Tests ∥ Build + Test + Ship (per slice)
 
@@ -78,7 +78,9 @@ Review isn't a phase bolted on at the end; it's the sweep `/ship-pr` runs on eve
 | `bug-hunter`              | Correctness — proves each claim with a failing test  |
 | `design-reviewer`        | Deep modules, layering, house-pattern fit            |
 | `conventions-reviewer`   | Naming, ubiquitous language, references conformance   |
-| `data-migration-reviewer` | Prod-volume breakage — when migrations/entities change |
+| `sql-and-migration-reviewer` | Prod-volume breakage — when migrations/entities change |
+| `perf-reviewer`           | Runtime cost, proved with numbers                    |
+| `simplicity-challenger`   | Complexity the problem doesn't require               |
 
 You triage every finding. `/resolve-pr-comments` runs the reply-and-fix loop (verify, fix or push back, reply on every thread; capped at two rounds). Human review for final approval.
 
@@ -96,9 +98,9 @@ Append the feature's row to the outcomes register: metrics with baselines, falsi
 
 ---
 
-## The Two Adhoc Tracks
+## The Two Scoped Tracks
 
-### `/adhoc-fullstack-feature` (medium, API + UI)
+### `/scoped-fullstack-feature` (medium, API + UI)
 
 UX-first across both repos with three hard checkpoints, so divergence is caught at the cheap stage:
 
@@ -108,7 +110,7 @@ UX-first across both repos with three hard checkpoints, so divergence is caught 
 
 Then build → two-agent tests → wire the UI to the real API → visual verify → two PRs.
 
-### `/adhoc-feature` (small, backend)
+### `/scoped-feature` (small, backend)
 
 Skip the design doc; keep investigation, tests, and review. Understand → match existing patterns → implement → two-agent tests → `/ship-pr` (review sweep) → PR.
 
@@ -122,7 +124,8 @@ Skip the design doc; keep investigation, tests, and review. Understand → match
 | `/signals`       | Mine first-party sources for problems nobody raised  |
 | `/visual-review` | Interactive explainers + sequence diagrams for a diff |
 | `/observability` | Read-only prod triage → classify → fix or escalate   |
-| `/local-testing` | Test endpoints with auto-auth                        |
+| `/call-api`      | Call your API with auto-auth                         |
+| `/visual-gate`   | Render a design doc as a page for its sign-off gate  |
 | `/debug-errors`  | Investigate production errors                         |
 | `/ux-touch`      | Design a targeted addition to a shipped feature      |
 | `/design-critique` | Structured feedback on a UX concept or built UI    |

@@ -2,6 +2,14 @@
 
 Rules for flows, IA, and interaction design. Each carries its why, so it can be applied to unseen cases — and each can reject a design.
 
+## The constraint set comes before the form (Alexander)
+
+The design loop is: lay out the constraints, derive a form that satisfies them, and when a constraint is added or removed, return to the set — never to the form (*Notes on the Synthesis of Form*). Concretely:
+
+- **Lay out the set first.** Before any flow or IA is drawn, the design artifact opens with the full set of constraints this design must satisfy, one line each with its source: the evidence-backed musts (what the incidents prove the user needs), the personas in play and their altitude, the domain mechanics that bound the space (channel policy, the account model, the action envelope), the requester's scope rulings, and the product principles with real tension. The set is what "good" means for this feature — it, not taste, is what rejects a candidate. The upstream artifacts contain all of this; the set is their extraction into one auditable list, so nothing binding stays implicit.
+- **Judge the form against the whole set.** A design element is justified by naming the constraints it satisfies, and candidates are compared as whole forms — an element that satisfies its own constraint while making a sibling constraint harder to satisfy is a defect of the whole, not a local win. (The surface map and the parity manifest are this rule at the IA and restructuring scales.)
+- **A changed constraint re-derives; it never patches.** When a constraint is added, removed, or corrected mid-design — a checkpoint bounce, a requester correction, a domain fact that turns out wrong — the change enters the constraint set first, and every part of the form that constraint touches is re-derived from the updated set. Never patch the design at the point of the complaint: the correction's sentence names one symptom of the changed constraint, and a patch scoped to that sentence leaves the constraint's other consequences unexamined. The tell: the edit touches exactly the element the correction mentioned, and nothing else was re-checked. BAD: "customers also see this page" lands mid-design → hide the one column the requester pointed at. GOOD: the persona constraint enters the set → the dual-audience matrix re-runs across the surface, and the fix falls out — the pointed column plus the vocabulary and default view the correction never mentioned. (The reversal protocol and correction-is-a-class are instances of this rule.)
+
 ## Design the full capability — scope is the requester's call, never yours
 
 Design for the complete capability the problem deserves, at full ambition. Never trim, defer, or phase the design to fit an appetite or a cycle — "this is too much for this cycle, let's defer X", "we'll do Y later", "keep v1 small" in your own voice is the failure. Scope and what-defers is the requester's decision, made after they see the full design, in an explicit conversation — you present the whole thing and the trade-offs, they draw the line. Appetite sequences the *build* (which slice ships first), it never shrinks what the design proposes. A design already cut down to the cycle robs the requester of the decision that is theirs and ships a half-measure they never chose.
@@ -28,6 +36,19 @@ When a value can't be known exactly at the grain the user asks for — a figure 
 
 For every metric, chart, column, panel: **who looks at it, what decision does it change, what action follows, what breaks if we cut it.** No decision changed → cut. A screen whose only exit is "now they know" must justify itself as genuine monitoring. Every screen names its **exit action** — what the user does next from here.
 
+## The system absorbs the failure before the user sees it
+
+When a flow can fail on the system's side — a sync item that won't attribute, an import row that won't parse, a channel listing with no product match — "surface the error and let the user sort it out" is the design that wasn't done, and dropping the item silently is worse (unmatched records pushed onto a failure list, re-dropped on every sync, invisible to any operator).
+
+**Rung 0 comes before the ladder: prevent the state at its source.** Ask where the invalid state is born and whether we own that moment. When the platform writes the artifact itself — we create the listing on the channel, we ingest the record at onboarding — the link is captured at birth and the queue never sees the item; a review queue for a state we author is handling an error we chose to allow. The ladder is for what's genuinely outside our write path: pre-existing records, third-party writes, channel identifiers immutable after creation. Then walk it and stop at the highest rung the signal supports:
+
+1. **Resolve silently** — the evidence is conclusive (an already-registered identifier): act, no user involvement.
+2. **Suggest with evidence** — probable, not certain: present the candidate match and its why, one action to confirm.
+3. **Route to a completable queue** — the system genuinely can't decide: the item arrives carrying everything needed to decide in place (the full channel snapshot it came with, so resolving never means leaving the queue to go look something up), never a bare error row or a toast.
+4. **Every answer teaches** — a resolution writes back what the automation was missing (assigning an account registers the identifier, so the next sync attributes it automatically) and a dismissal is remembered, never re-asked. A queue the same answered item re-enters is this rung unbuilt. Rungs 1–3 handle an error that already happened; only rung 0 prevents the first occurrence and rung 4 the second — a design missing both is pure apology.
+
+A catalog-mapping surface is the ladder end to end: unmatched channel listings are prevented where we create the listing, silently resolved where the identifier is already registered, suggested where the match is probable, and otherwise queued with their full snapshot attached so the answer registers the mapping for next time. The repeat-and-reversal rule below is the small end of the same idea; this is the big end — measure a design by how much failure the system eats, not by how well it apologizes.
+
 ## Queues must be completable
 
 Any "needs attention" surface specifies: entry condition, the full disposition set (act / delegate / dismiss), where each disposition sends the item, and the designed empty state. An item that can't leave the queue makes it a dashboard in disguise — operators learn to ignore it within weeks, and real exceptions die there. Design the re-entry experience: what does it show tomorrow, and after a week away?
@@ -43,6 +64,10 @@ Per trigger: maps to user-visible business damage (lost sales, penalty, angry cu
 ## Recommendations five-pack
 
 Any "the platform suggests X" specifies: (1) the one-line why, inline; (2) deeper rationale on demand; (3) impact preview before commit (what changes, on which records, expected effect); (4) undo/rollback; (5) a dismissal path and what dismissal signals. Experts distrust unexplained automation most — the operator needs the evidence chain; the self-serve customer needs guardrails against over-trust (conservative defaults, confidence framing).
+
+## Every action states its repeat and its reversal
+
+For each mutating action in a flow, the design answers two questions before build: what a second identical submit produces (nothing — the endpoint is idempotent or the control disables while pending; never a second row), and how the user backs out — undo where reversal is cheap, a confirmation that names the blast radius where it isn't. The five-pack above already covers platform suggestions; this covers everything else the user does. A generic "Are you sure?" is both questions left unanswered.
 
 ## Dual audience
 

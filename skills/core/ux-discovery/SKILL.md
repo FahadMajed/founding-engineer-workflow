@@ -49,6 +49,10 @@ docs/discovery/{feature-name}/
 
 **Isolation rules:** ideation agents never see each other's work, your leanings, or the BETS section. Do not read other features' discovery folders — each discovery thinks independently. Exemplars are excerpted in `references/exemplars.md`; read that, not past docs. The shared ledgers are exempt and expected reading: `docs/discovery/evidence-ledger.md`, `docs/discovery/opportunities.md`, `docs/proposals/DECISIONS.md` — facts and verdicts don't anchor, solutions do.
 
+## Multi-session efforts — the decision map
+
+When open decisions block each other across working sessions — answers gated on external parties (a vendor reply, provisioning, data that must move first), several humans owning pieces, or an open-questions ledger whose resolution order matters — load `references/decision-map.md` and chart them as a decision map on the task tracker, worked one ticket at a time. The map carries decision state between sessions; the discovery artifacts stay the thinking, and the pipeline below stays whole. A discovery whose fog fits one session never needs one.
+
 ---
 
 ## 1. Intake
@@ -128,6 +132,7 @@ Before detailed design, ground the chosen direction with the requester (2–3 qu
 Load `references/design-judgment.md`, `references/domain.md`, and `references/view-archetypes.md`. Now the codebase is relevant: match existing product patterns where they fit, flag new primitives as inventions.
 
 Produce `04-design.md`:
+- **Constraint set** — the artifact opens with it, per design-judgment's Alexander rule: every constraint the design must satisfy, one line with its source, extracted from the upstream artifacts. Mid-design changes (a checkpoint bounce, a corrected domain fact) enter here first and re-derive what they touch — never a local patch.
 - **User flows** — entry, happy path, alternates, recovery; edge cases domain-first.
 - **View derivation** — candidates derived per `view-archetypes.md` (from the domain artifacts inventoried in exploration + the personas' question shapes), each dispositioned build / defer / N-A-because.
 - **Surface map** — every existing screen of the app, dispositioned against this capability: gains an entry point / gains a column-or-panel / unchanged-because. A capability that lives only on its own page while sibling surfaces stay silent is usually an IA defect — the map makes that a decision, not an accident.
@@ -141,6 +146,7 @@ Produce `04-design.md`:
 Design rationale goes in its own section, not inlined into component descriptions.
 
 **Gate D** — do-confirm before the critique gate. The ticked block is appended to the end of `04-design.md` (Gate F's lives at the end of `00-framing.md`, Gate I's at the end of `03-synthesis.md`) — gates live in the artifacts so the fresh critic can audit them. Each tick carries a pointer to the line that satisfies it:
+- [ ] Constraint set opens the artifact; any mid-design constraint change re-derived from the set, not patched at the complaint
 - [ ] Every screen classified MONITOR/SCAN/DECIDE with a named exit action
 - [ ] Click-economics table for the primary persona's top 5 tasks; any task over 2 navigations flagged and resolved
 - [ ] Peak stress test and primary-language pass recorded

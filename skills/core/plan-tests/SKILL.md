@@ -27,7 +27,7 @@ Understand the business requirements and user flows. Focus on WHAT the system sh
 
 Derive your scenarios from the **Use Cases** and **Business Rules** — that's what the system does for someone.
 
-The **Internal design** section is written for the implementer. It sharpens scenarios you derived from behavior; it never generates one of its own. Step 6 governs what it may and may not contribute.
+The **Internal design** section is written for the implementer. It sharpens scenarios you derived from behavior; it never generates one of its own. Step 7 governs what it may and may not contribute.
 
 ### 2. Read Testing Standards
 
@@ -53,7 +53,29 @@ Run once now against your candidate list; run again after drafting, when the rea
 
 Goal: minimum tests for maximum confidence. A test has a maintenance cost; spend it only on a distinct behavior.
 
-### 5. Write Scenarios
+### 5. Mock Gate (run twice, same passes as the Consolidation Gate)
+
+A stub is fuel for a scenario, never its subject. For every scenario whose GIVEN stubs an external service, ask: **if the THEN comes out wrong, whose code is wrong — ours or the stub's?**
+
+- **Ours decides → keep it.** The stub hands over a payload; our logic makes a call someone can observe. "Two tenants come back on a shared integration account → an alias account exists for each." "The SKU isn't in our catalog → the listing is skipped and the sync job counts it." "The channel read throws → the other tenant still syncs and the failure lands on the job."
+- **The stub decides → cut it.** You hand-wrote the payload, so the assertion reads your own fixture back. "Mock returns sale price 49.90 → `listing.salePrice` is 49.90" proves the fake matches the mapper, not that the mapper matches the third party. Only a live call catches a renamed field. (Same call `/fix-bug` makes on adapter fixes.)
+
+Other signals the scenario is testing the stub:
+
+- The GIVEN needs three or more stubs to stand up → it's testing wiring.
+- The THEN asserts what we *sent* the external service ("called with `lastUpdatedAt` = last sync time"). Keep only when that request is itself a business rule — an incremental window, an idempotency key — and say so in the scenario. Otherwise it's a call-args change detector.
+- The stub is one of our own services or repositories → never. Re-aim at the outermost external boundary (the client/adapter method) or drop the scenario. One exception: when the logic under test lives *inside* the adapter — a reject-code classification, a lifecycle mapping — stubbing the adapter method would mock the code under test, so the boundary drops to the transport. Keep the scenario if our logic still authors the THEN, but note that the fixture is now a hand-written third party (its routes, its envelope, its field names): the payload *shape* is unproven no matter how many cases you add, so it goes in the Verification Plan.
+
+**Where the survivors live.** Group them under the suite of the service that *consumes* the third party — the syncing service, the pricing service, the health recompute. Concretely: a `describe` block added to that service's existing spec, not a new spec file named for the vendor or the fix. A file called `{{vendor}}-receipt-reject-classification.e2e.spec.ts` is the tell — it has to restage the whole world the existing spec already stages, and nothing in it belongs to the vendor rather than to receiving. A feature being external-service-heavy is not a reason for a big external test suite: test count tracks the decisions our code makes, not the third party's API surface.
+
+**Cut ≠ unverified.** When the risk is real but only a live call can catch it — a field name, an auth flow, a pagination cursor, whether the third party reports inbound quantities in a namespace our SKUs share — plan the verification instead of a test:
+
+- A read-only probe script in `scripts/`, the `verify-*.ts` shape: hits the live API for one real account, prints PASS/FAIL per probe, writes nothing. `scripts/verify-inbound-mapping.ts` is the model.
+- `/call-api` for a one-off check against the third party, or for the flow end-to-end against a running server.
+
+Record each one in the doc's Verification Plan (see Output) with the risk, the check, and how to run it. Unwritten, the next session backfills a fabricated-payload test and calls the risk covered.
+
+### 6. Write Scenarios
 
 Focus on **business logic**, skip:
 
@@ -68,7 +90,7 @@ For each scenario, include:
 
 - Setup (GIVEN): What data/state exists
 - Action (WHEN): What operation triggers
-- Assertions (THEN): What to verify (DB state, API calls, side effects)
+- Assertions (THEN): What to verify (response shape, DB state, side effects). An outbound call to an external service counts only under the Mock Gate's rule — the request itself has to be the business rule.
 
 Use describe blocks to group related scenarios.
 
@@ -101,17 +123,27 @@ In plain english.
 **WHEN:** Action (usually api call)
 **THEN:** Assertions
 
+## Verification Plan (not tests)
+
+Risks a test can't reach, and how each is checked instead.
+
+| Risk | Check | Run |
+| --- | --- | --- |
+| [what breaks silently if we're wrong] | [what the probe compares] | `scripts/verify-x.ts` / `/call-api` |
+
 ## Assumptions & Open Questions
 
 Anything the design doc left unspecified that you had to assume.
 ```
+
+Drop the Verification Plan section when the feature touches no external service. Never leave it as a placeholder for work a test already covers.
 
 Two rules while writing:
 
 - Tag each assertion mentally: stated (in the doc), inferred (you reasoned it), or unspecified (doc is silent). Stated → assert freely. Inferred → assert, note the basis. Unspecified → do NOT invent an authoritative answer; record it under Assumptions & Open Questions and pick a labeled assumption for the test.
 - A test's title must match its own THEN. If the title says "Healthy" and the assertion says "Slipping", one is wrong.
 
-### 6. Internal design — values, never scenarios
+### 7. Internal design — values, never scenarios
 
 Its structure is the implementation's structure. A scenario list shaped like it is a list that tests the build instead of the behavior — the thing this skill exists to prevent. So it acts on the scenarios you already have. Two uses only:
 
@@ -131,5 +163,6 @@ Spawn the `qa-reviewer` agent. Pass it (1) the scenarios doc, (2) the design doc
 The reviewer finds only *coverage gaps* — its bias is to add. After it returns:
 1. Treat each gap as a candidate, not a command. Add it only if it's a distinct behavior; if it's a variant, fold it into an existing test as a case.
 2. Re-run the Consolidation Gate over the new total. Adding N gaps should not grow the suite by N tests.
+3. Re-run the Mock Gate over anything it added. A gap that can only be covered by an assertion the stub authors goes to the Verification Plan, not the suite — the reviewer reads the design, not this rule.
 
 Done when every surviving test answers "what does this cover that no other does?" and every title names a behavior.

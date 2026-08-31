@@ -1,6 +1,6 @@
 ---
 name: sdlc
-description: The full feature lifecycle for a big fullstack feature across the backend repo and the frontend repo. Full /ux-discovery → a complete design doc (narrative sections + /design-schema, /design-api, /design-components, /design-internals, each agnostically reviewed) → /build-feature → two-agent tests → wire + visual verify → two cross-linked PRs. Iterative and collaborative — the agent does the work, you sign off every gate. Use when (1) user says "/sdlc", (2) a feature is large enough to need a real design doc and days of work, (3) it spans API + UI. For small work, use /adhoc-fullstack-feature instead.
+description: The full feature lifecycle for a big fullstack feature across the backend repo and the frontend repo. Full /ux-discovery → a complete design doc (narrative sections + /design-schema, /design-api, /design-components, /design-internals, each agnostically reviewed) → /build-feature → two-agent tests → wire + visual verify → two cross-linked PRs. Iterative and collaborative — the agent does the work, you sign off every gate. Use when (1) user says "/sdlc", (2) a feature is large enough to need a real design doc and days of work, (3) it spans API + UI. For smaller work, use /scoped-fullstack-feature instead.
 ---
 
 # SDLC
@@ -13,6 +13,8 @@ The full lifecycle for a big fullstack feature, across two repos.
 
 - **Backend repo** — NestJS, jest. Branch + PR here.
 - **Frontend repo** — React/Vite. Separate branch + PR here.
+
+Resolve the frontend root once at the start of the run (`git -C <path> rev-parse --show-toplevel`, or find it) and reuse it. Never hardcode an absolute path — checkouts differ per machine and per session, and a skill carrying one sends every run to a directory that doesn't exist.
 
 Two repos → two branches → two PRs, cross-linked. Run each repo's build/lint/test from that repo's root. Shell cwd drifts across a long session — prefix cross-repo commands with an explicit `cd` (a build run in the wrong repo reports the wrong errors and wastes a round). (Single-repo? Collapse to one branch and one PR — the phases don't change.)
 
@@ -34,6 +36,10 @@ Two repos → two branches → two PRs, cross-linked. Run each repo's build/lint
 The discovery-side skills (`/proposal`, `/ux-discovery`, `/ux-discovery-lite`, `/design-critique`) live in the frontend repo's `.claude/skills/`.
 
 An sdlc-scale feature enters on a filled proposal (`docs/proposals/{slug}.md`) with Gate 1 (worth shaping + appetite) decided. If the ask arrives as a sentence or two with no proposal, load `/proposal` first — interview the requester, write the proposal, get Gate 1 decided — then continue. Discovery consumes the proposal as its evidence seed.
+
+When the effort's open decisions can't resolve in one sitting — answers gated on external parties, groundwork, or several humans — chart them as a decision map on your tracker first (`.claude/skills/ux-discovery/references/decision-map.md`) and work it until the way is clear; the lifecycle below consumes its decisions.
+
+The effort's task rides the whole lifecycle. Find it or create it (`/optional/task-management`) — before phase 1, not at the end. Each gate that passes fills the section it decided — Problem at the UX gate, Solution at the frontend gate, What Ships and Out of Scope from the design doc — so the task reads current at any point in the run. A verdict that stops the lifecycle closes the task with that verdict as its completion comment.
 
 ### 1. Discover — full `/ux-discovery`
 
@@ -65,7 +71,9 @@ Follow `docs/design_docs/TEMPLATE.md`, drafted via `DESIGN_DOC_METHOD.md`.
   - `/design-internals` — the inside of those interfaces: computations, state machine, invariants, replay, windows. `N/A` for CRUD over existing entities; the skill carries the trigger test.
 - **Tail** — Implementation Details, Assumptions/dependencies, Milestone, Glossary. Inline.
 
-→ **GATE (Design doc):** sign-off on the whole doc.
+Before the gate, run **simplicity-challenger** once on the **whole doc**. The per-section reviews can't see the challenge that spans sections — a table plus an endpoint plus a cron that an existing surface and a column would have covered. It returns SIMPLER challenges (each proved against the use cases), EARNED lines for the weight it tried to cut and couldn't, and nothing when there's nothing. Resolve them into the doc, then carry the verdict into the gate message: what got cut, and what complexity is earned and why.
+
+→ **GATE (Design doc):** sign-off on the whole doc. Render it with `/visual-gate` and link the page in the gate message — the requester decides on shape (schema before/after, use-case flows, endpoint cards, the slice stack) rather than on seven sections of prose. The doc stays canonical; a gap the render surfaces gets fixed in the doc, then re-rendered.
 
 ### 4. Plan tests — `/plan-tests` (fresh agent)
 
@@ -85,7 +93,7 @@ Wire the frontend to the real API per the design doc's API section — the recor
 
 ### 7. Ship the frontend — `/ship-pr`, cross-linked
 
-jsdoc on the frontend's changed files, then `/ship-pr` from the frontend repo root (or `gh -R`), sliced per pr-stack.md if over 400 changed source lines (tests/docs excluded): draft PR carrying `/pr-evidence` from the branch's final state (a screenshot per state — empty, loading, error, populated; a GIF of the key interaction; before/after where behavior changed; re-capture if triage changes UI code) → inline sweep → triage → ready.
+jsdoc on the frontend's changed files, then `/ship-pr` from the frontend repo root (or `gh -R`), sliced per pr-stack.md by use case — one complete use case per PR, with ~400 changed source lines (tests/docs excluded) as a signal on that cut, never the cutter: draft PR carrying `/pr-evidence` from the branch's final state (a screenshot per state — empty, loading, error, populated; a GIF of the key interaction; before/after where behavior changed; re-capture if triage changes UI code) → inline sweep → triage → ready.
 
 Each body links the other repo's PRs + the design doc + the discovery doc.
 
@@ -93,7 +101,9 @@ Each body links the other repo's PRs + the design doc + the discovery doc.
 
 Append the feature's row to `docs/discovery/outcomes-register.md`: metrics with baselines from DISCOVERY §13, falsification lines from §12, first check date ≥ 3 weeks post-ship. `/outcome-review` grades it when the date arrives — a shipped feature with no register row is a bet nobody can lose, which means nobody can learn from it.
 
-Then `/optional/task-management`: one task, or the design doc's Milestone broken into subtasks. Link both PRs + the docs. Status `in review`. Description for non-technical reviewers.
+Then **reconcile the design doc with what shipped**: walk its Data + API sections against the merged migrations, entities, controllers, and DTOs, and fold every delta into the doc — the ones the API section already recorded against `contract-draft.md`, plus anything triage changed on the PRs. The doc is what the next person and the next agent read; a doc describing the design instead of the system is worse than no doc, because it's believed.
+
+Then `/optional/task-management` on the effort's task (from step 0): status `in review`, a completion comment linking both PRs + the docs, and the design doc's Milestone section broken into subtasks when the slices warrant tracking. The description reads for non-technical reviewers.
 
 Optionally, close with a short plain-language quiz for the requester on what shipped — what changed, what it does and doesn't do, what to watch. The runner of this lifecycle should be able to *represent* the work to the team, not just approve it; offer the quiz, don't impose it.
 
