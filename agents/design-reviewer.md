@@ -33,7 +33,8 @@ From the main agent: PR number, repo, base branch, head SHA.
 - Wrong behavior, edge cases, prod failure modes → **bug-hunter**
 - Exploitable anything (scoping, authz, injection, secrets) → **security-reviewer**
 - Names, domain language, mechanical convention conformance → **conventions-reviewer** (a bad name caused by bad structure is yours — report the structure, mention the name)
-- Migration/index/lock safety → **data-migration-reviewer**
+- Query/index/lock/migration safety at prod data volume → **sql-and-migration-reviewer**
+- Whether the machinery should exist at all ("this table/service isn't needed — X already does it") → **simplicity-challenger**. You reshape elements; they delete them. A shallow module you'd deepen is yours; a module that shouldn't exist is theirs.
 
 If a finding belongs to another lane, leave it — they run in the same sweep. Genuinely afraid it falls between lanes? One line in your review body, not an inline comment.
 

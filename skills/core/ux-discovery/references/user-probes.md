@@ -21,14 +21,15 @@ Grade any expression of interest by what the speaker gave up, lowest to highest:
 ## The menu
 
 ### Operator debrief — instrument the proxy channel you can't eliminate
-Within a day of any client call that touched the problem space, the operator answers five prompts (voice note fine, 2 minutes):
+Within a day of any client call that touched the problem space, the operator answers six prompts (voice note fine, 2 minutes):
 1. What did the client **say** — verbatim, in their own words kept as-is?
 2. What did they **do or show** — behavior, artifacts, not opinion?
-3. What did they **commit** to?
-4. What **surprised** you?
-5. What do **you think** it means? *(kept separate — this is the operator's read)*
+3. How did they **react** — tone, wording, what they lingered on or brushed past? Observed, not your read.
+4. What did they **commit** to?
+5. What **surprised** you?
+6. What do **you think** it means? *(kept separate — this is the operator's read)*
 
-Answers land in the evidence ledger with provenance labels: `[client-verbatim]`, `[client-behavior]`, `[client-commitment]`, `[operator-interpretation]`. A problem statement resting solely on `[operator-interpretation]` hasn't met the customer yet.
+Answers land in the evidence ledger with provenance labels: `[client-verbatim]`, `[client-behavior]`, `[client-reaction]`, `[client-commitment]`, `[operator-interpretation]`. A problem statement resting solely on `[operator-interpretation]` hasn't met the customer yet.
 
 ### Messaging micro-survey — 1–3 questions, event-adjacent
 Messaging-channel response rates run roughly double email's, and asking right after the relevant event lifts them further (published survey benchmarks — treat the exact figures as rough priors). Rules the generator must obey: **max 3 questions**; each past-behavior-anchored and open; sent personally by the operator (never a blast link); timed next to the triggering event ("saw your orders spiked last week —"); voice-note invitation; a thank-you close that promises what happens with the answer. At a small account population, 9 answers is a good yield — and enough, because the questions are qualitative.
@@ -41,6 +42,9 @@ At a small account population each loss is a large share of revenue and the sing
 
 ### Prototype walkthrough — the production frontend earns its keep
 15 minutes with one person of the target persona: hand them the running frontend and a real task ("find which account needs you today"), then silence. Record where they hesitate, what they say first, what they never notice. Never: a guided tour, "as you can see", or asking whether they like it. One walkthrough converts a stack of T5 design assumptions into T1 observations for the cost of a single message.
+
+### Self-immersion run — get the situation firsthand, never play the person
+20 minutes, the requester or designer, before committing a customer- or client-facing design: do one real task in the production frontend under the persona's actual conditions — a phone, the {{YOUR_PRIMARY_LANGUAGE}} UI, mobile data, first login in two weeks, entry through the public listing rather than a bookmarked deep link. Log what you hit as T1 observations about the product ("couldn't find the number", "the table died at 375px") — never as claims about people ("customers are confused" still takes a customer). The boundary: simulate the situation (device, language, cadence, interruption), never the identity — experiencing someone's situation firsthand beats inferring it from testimony (Zhou & Epley 2017), while role-playing the person produces confident fiction. Costs nothing from the contact budget; the cheapest instrument on this menu.
 
 ### Buy-a-feature — forced trade-off instead of importance ratings
 Give the customer a constrained budget (100 units of {{YOUR_CURRENCY}} play money) across 5–8 candidate struggles priced by rough effort. The constraint defeats politeness — they cannot politely fund everything. One participant yields a full preference ordering, so 5–8 participants give a stable picture. Results rank opportunities for further discovery; they are not a build order.

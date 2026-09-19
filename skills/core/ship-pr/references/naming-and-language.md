@@ -21,6 +21,17 @@ One name per concept — the code's name, not a synonym. Before coining any term
 
 Flag: an invented synonym (a second word for a concept that already has a canonical name), one concept under two names inside a diff, a mechanism name where a domain name exists (a `DataProcessor` that is really a publisher). New concepts should extend a family the way its siblings do (a `{{X}}Threshold` sits next to `{{X}}`).
 
+## Vendor names stay at the edge
+
+A third party's name is an implementation fact, not a domain concept. It belongs in exactly three places: the **enum value** that identifies the integration, the **adapter** that speaks its protocol (`{{Vendor}}Warehouse`, `{{Vendor}}Order`), and the **label** a user reads. Anywhere else it is a leak: it hard-codes one vendor into a surface the next vendor then has to reuse, fork, or rename.
+
+Flag the name on route paths, DTO and type names, service methods, columns, interface and capability members, error constants, and anything in a shared module's signature.
+
+- BAD: `POST /warehouses/{{vendor}}/discovery` · `Discover{{Vendor}}HubsRequest` · `discover{{Vendor}}Hubs()` · `list{{Vendor}}Hubs?()`
+- GOOD: `POST /warehouses/discovery` taking `provider` · `DiscoverWarehouseRequest` · `discoverWarehouse()` · `discoverLocations?()`
+
+The test: could a second vendor of the same kind reuse this surface unchanged? If adding one forces a rename or a parallel route, the name was doing structural work it should never have carried. The same leak wearing different letters is `if (channel === '{{Vendor}}')` inside shared code — which is what the capability object (`build-feature/references/optional-capabilities.md`) exists to prevent, and the fix is the same: the vendor fact lives in the adapter that owns it, and shared code reads a capability, never an identity.
+
 ## The system metaphor
 
 **Customize the metaphor for your product.** The system models {{YOUR_DOMAIN}}; its modules read like {{YOUR_DOMAIN}}'s real divisions of work. A name a domain expert describing their workday wouldn't recognize is suspect — for domain-facing code. Infra code (locks, queues, auth plumbing) is exempt; it speaks infra.

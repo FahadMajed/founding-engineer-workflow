@@ -7,7 +7,7 @@ description: Grade shipped product bets against what their discoveries predicted
 
 Every discovery ships with predictions: success metrics with baselines, falsification lines ("we're wrong if…"), watch items. This skill is the half of the job that happens after shipping — without it, a wrong build verdict and a right one look identical forever, and the next verdict can't be calibrated by the last one.
 
-Bets are registered at ship time by `/sdlc` and `/adhoc-fullstack-feature`; this skill grades them.
+Bets are registered at ship time by `/sdlc` and `/scoped-fullstack-feature`; this skill grades them.
 
 ## Inputs
 
@@ -20,7 +20,7 @@ Bets are registered at ship time by `/sdlc` and `/adhoc-fullstack-feature`; this
 
    **Customize this section for your product** — each bet names one of these metric stores:
    - `{{YOUR_SOURCE_ANALYTICS}}` — product analytics events (the codebase logs one on every state-changing action)
-   - `{{YOUR_DB_QUERY_COMMAND}}` — read-only production queries (the `/local-testing` and `/observability` patterns)
+   - `{{PROD_DB_RO}}` — read-only production queries (the `/call-api` and `/observability` patterns)
    - `{{YOUR_LOG_SOURCE}}` — error/exception monitoring
 
    If a source can't be pulled in-session, name the exact query/export needed and grade `inconclusive — blocked on {x}`; an unmeasurable bet is a registration defect to name, not to skip.
@@ -38,4 +38,4 @@ Bets are registered at ship time by `/sdlc` and `/adhoc-fullstack-feature`; this
 
 ## Report
 
-Anomaly-first digest in chat: bets graded this run (falsified first, with what they imply — iterate / remove / leave), what's blocked and on what, which watching bets come due next, and any register hygiene problems: sweep `{{root}}/docs/discovery/*/` for discoveries whose feature shipped (merged PRs) with no register row — features shipped outside `/sdlc` and `/adhoc-fullstack-feature` miss the registration step, and this sweep is what catches them. Where a falsified bet traces to a specific requester's ask, say so plainly and kindly: the bet didn't pay, the raising was still right — the intake pipe lives on people staying willing to raise things.
+Anomaly-first digest in chat: bets graded this run (falsified first, with what they imply — iterate / remove / leave), what's blocked and on what, which watching bets come due next, and any register hygiene problems: sweep `{{root}}/docs/discovery/*/` for discoveries whose feature shipped (merged PRs) with no register row — features shipped outside `/sdlc` and `/scoped-fullstack-feature` miss the registration step, and this sweep is what catches them. Where a falsified bet traces to a specific requester's ask, say so plainly and kindly: the bet didn't pay, the raising was still right — the intake pipe lives on people staying willing to raise things.

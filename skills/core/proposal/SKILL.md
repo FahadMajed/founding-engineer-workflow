@@ -1,6 +1,6 @@
 ---
 name: proposal
-description: Interview a team member to produce a problem-first proposal — the intake artifact for /sdlc and /adhoc-fullstack-feature. Use when (1) user says "/proposal", "write a proposal", or "pitch", (2) a feature request arrives as a sentence and needs shaping before discovery, (3) someone wants to raise a problem or opportunity for the product pipeline.
+description: Interview a team member to produce a problem-first proposal — the intake artifact for /sdlc and /scoped-fullstack-feature. Use when (1) user says "/proposal", "write a proposal", or "pitch", (2) a feature request arrives as a sentence and needs shaping before discovery, (3) someone wants to raise a problem or opportunity for the product pipeline.
 ---
 
 # Proposal Interviewer

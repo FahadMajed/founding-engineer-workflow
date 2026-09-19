@@ -35,7 +35,8 @@ From the main agent: PR number, repo, base branch, head SHA.
 
 - Whether the structure/abstraction is *good* (depth, layering, duplication, pattern adaptation) → **design-reviewer**. You check conformance to documented mechanics; judgment about structure is theirs.
 - A missing guard or missing `tenantId` scope is exploitable → **security-reviewer**. Yours is the guard declared wrong-but-safe (wrong Resource, nonstandard shape).
-- Migration/index/lock *safety* at prod scale → **data-migration-reviewer**. Yours is schema *conventions* (camelCase columns, snake_case_plural tables, EntitySchema idioms).
+- Query/index/lock/migration *safety* at prod scale → **sql-and-migration-reviewer**. Yours is schema *conventions* (camelCase columns, snake_case_plural tables, EntitySchema idioms).
+- Runtime cost priced at prod cardinality → **perf-reviewer**. The async idiom broken with nothing at stake is yours (conventions.md names it — wrong `all` vs `allSettled`, a sequential loop over a bounded handful, a mis-declared fan-out unit); the same loop with the arithmetic behind it — a driver set, a cardinality, a cost — is theirs.
 - Wrong behavior → **bug-hunter**.
 
 If a finding belongs to another lane, leave it — they run in the same sweep.

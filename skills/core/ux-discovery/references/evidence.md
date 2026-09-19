@@ -31,6 +31,13 @@ Interrogated evidence outlives its discovery. Check `docs/discovery/evidence-led
 
 When raw material exists (tickets, threads, exports, review dumps), elicit the requester's own read first — "what stood out to you in this?" — then present yours as a diff: what you add, what they saw that you missed, where you disagree. AI-only synthesis of user material drops a large share of the important detail (Torres's published experiments put it at 20–40%): synthesize one conversation at a time, immediately, never a bulk batch, and store verbatim quotes rather than paraphrase.
 
+## Felt experience is evidence — at the tier it earns
+
+What the moment felt like is a claim like any other, on the same ladder: an observed reaction (an angry voice note, a public review's own wording, hesitation in a walkthrough) is T1–T2; the person naming their own feeling, dated and specific, is T3; the requester's read of someone else's feeling is T4; a feeling produced by model reasoning is T5, labeled. Capture the reaction, not a diagnosis — the words used, the tone, what they lingered on or brushed past. Why it earns collection: reading emotional tone accurately is the one empathy measure shown to track finding important unmet needs (Li et al. 2022), while imagining a user's inner state without contact raises confidence, not accuracy (Eyal et al. 2018) — so a felt claim takes the same provenance as a number, and pays the same way.
+
+BAD: "Customers feel anxious about pricing changes."
+GOOD: "«the price changed and nobody told me?» — subscriber voice note in their own language, June, forwarded by the operator [T1]; the frustration is in their wording, not our read of it."
+
 ## The evidence table
 
 Written into `00-framing.md`, one row per load-bearing claim: **claim → tier → provenance (source, date, scope) → sampling caveat → consequence** (VALIDATED: build on it / SUPPORTED: build + instrument / ASSUMED: named test or recorded bet). The sampling-caveat cell holds the correction that applies — base rate for ticket-derived claims, hat + proxy-check result for customer claims, per-link tiers for inference chains. An empty caveat cell means unchecked, and Gate F tests for it.
@@ -43,7 +50,8 @@ Run on every anecdote; cap at ~3 follow-ups, bank the claim at the tier it earne
 2. Which account / customer / channel exactly — name it.
 3. How many separate times in the last 4 weeks? (With an enumerable account population: "which of the accounts does this apply to?")
 4. What did that specific instance cost — minutes, a lost sale, a penalty, an angry customer message?
-5. Who else has hit this?
+5. What did that moment feel like — their words at the time (the voice note, the message), not a read after the fact?
+6. Who else has hit this?
 
 ## Question craft (Mom Test)
 
@@ -64,6 +72,8 @@ An internal requester speaks from three positions with different evidentiary wei
 - **(a) As user** — describing their own platform work. Strong evidence for operator-facing features; they ARE the audience.
 - **(b) As customer proxy** — speaking for an account or customer. Mandatory follow-up: "Did the customer say or show this, or is it your read?" An inference recorded as customer evidence is laundering.
 - **(c) As domain expert** — channel mechanics, penalties, thresholds. Strong, but verify numbers: "How do you know that threshold?" If they say "I think", record it as T4, not fact.
+
+**Expertise calibration — platform power-use is not domain expertise.** A requester (or persona) who is a daily power user of the product can still be a non-expert in the specialty the feature serves, and the two get silently conflated. Probe it at interview: "Do you trust your own decisions in this area — when did one go wrong?" BAD: ideation cuts recommendations ("these operators know what to do") because the persona sheet says power users; the requester corrects that nobody on the team is an expert in the specialty — themselves included, and their own calls go wrong — reversing a core design cut after synthesis. GOOD: operator surfaces stay dense and keyboard-first (a power-use fact) while the feature assumes no specialist expertise and grades its own recommendations in public (an expertise fact); the two attributes are designed for separately.
 
 Customer-facing claims aren't deadlocked on proxies. First-party customer evidence exists without interviews: {{YOUR_SOURCE_REVIEWS}} and ratings, subscriber support/message threads, {{YOUR_ANALYTICS}} funnels and drop-off on self-serve surfaces, trial-to-paid and churn queries. And customers can be asked directly — the deployable instruments (operator debrief protocol, micro-surveys, shadow sessions, switch interviews, prototype walkthroughs), with their ethics tiers and contact budget, live in `user-probes.md`. A Probe verdict on a customer claim names its instrument or source from there.
 

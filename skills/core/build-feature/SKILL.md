@@ -19,8 +19,10 @@ Implement features following established patterns.
 
 - [references/permissions.md](references/permissions.md) — guard stack, resource/action, scoping
 - [references/events.md](references/events.md) — domain event emit/consume + existing events
-- [references/crons-and-sync.md](references/crons-and-sync.md) — `@RunEvery`, job types, job tracking, advisory lock ids
+- [references/crons-and-sync.md](references/crons-and-sync.md) — `@RunEvery`, fanning a cron out as queued units, job types, job tracking, advisory lock ids
 - [references/entities-and-migrations.md](references/entities-and-migrations.md) — `EntitySchema`, column types, encryption, migrations, audit enums
+- [references/domain-errors.md](references/domain-errors.md) — stable error codes for failures a client has to word itself
+- [references/queue-error-verdicts.md](references/queue-error-verdicts.md) — retry / terminal / deferral, and why a wrapper must carry its own verdict
 
 ## Workflow
 
@@ -50,7 +52,7 @@ Implement features following established patterns.
 
 ### 4. Ship (per slice) — /ship-pr
 
-Run the `jsdoc` agent on changed files (it edits code — pre-PR), then load `/ship-pr`: it opens the draft PR (What / Why / Stack / Tests / Try it), spawns the review sweep — `security-reviewer`, `design-reviewer`, `conventions-reviewer`, `bug-hunter` (fed the design doc + scenarios + gap report), `data-migration-reviewer` when the diff touches migrations/entities/queries — which comments inline on the PR, then triages every thread and marks ready. Review happens on the PR, not before it.
+Run the `jsdoc` agent on changed files (it edits code — pre-PR), then load `/ship-pr`: it opens the draft PR (What / Why / Stack / Tests / Try it), spawns the review sweep — `security-reviewer`, `design-reviewer`, `conventions-reviewer`, `bug-hunter` (fed the design doc + scenarios + gap report), `sql-and-migration-reviewer` whenever the diff contains a query or changes how data is read or written, `perf-reviewer` whenever the diff touches a runtime path (it prices loops, fan-outs, and memory at prod cardinality), `simplicity-challenger` whenever the diff adds new machinery — which comments inline on the PR, then triages every thread and marks ready. Review happens on the PR, not before it.
 
 
 ## CRITICAL Rules

@@ -7,6 +7,8 @@ description: Build verified, interactive visual explainers for code under review
 
 The failure mode this skill exists to prevent: asking "how do I present this information?" and producing a document with styled boxes. The right question is "what does this code *do* — and can I make the reviewer do it?"
 
+**Not this skill:** rendering a **design doc** at its gate — that's `/visual-gate`. The split is what's rendered, not when: this skill renders behavior and runs on both sides of the code (sdlc step 3 uses it to diagram the Existing Solution before any exists). The two compose — a design whose core is a decision engine gets a visual-gate page for the whole doc, linking a visual-review artifact from its Internal design block. Build the interactive one once.
+
 ## The approach
 
 **1. Name the subject's essential verb, and make the centerpiece perform it.**

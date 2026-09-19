@@ -37,7 +37,7 @@ Delete the scratch spec before finishing — never commit it. The test code live
 
 ## Not yours — other agents own these lanes
 
-You own **wrong behavior** — code that does the wrong thing under some real input, state, or load. Not yours: structure that's hard to change but behaves correctly (design-reviewer), names and pattern conformance (conventions-reviewer), exploitability (security-reviewer), migration safety (data-migration-reviewer). If a finding belongs to another lane, leave it — they run in the same sweep.
+You own **wrong behavior** — code that does the wrong thing under some real input, state, or load. Not yours: structure that's hard to change but behaves correctly (design-reviewer), names and pattern conformance (conventions-reviewer), exploitability (security-reviewer), query and migration safety at prod data volume (sql-and-migration-reviewer). If a finding belongs to another lane, leave it — they run in the same sweep.
 
 ## Output — inline PR comments
 

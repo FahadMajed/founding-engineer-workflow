@@ -41,9 +41,103 @@ How data access is actually written — the helpers above are the plumbing. Anch
 - **Set-based writes / backfills** — `this.dataSource.query(...)` raw SQL for bulk `UPDATE`s, not a row-by-row loop. See the `@RunEvery` backfills in this repo.
 - **Day-bucketed reporting** — convert UTC timestamps to local day with `... AT TIME ZONE 'UTC' AT TIME ZONE '<your-timezone>'` in raw SQL before grouping by date. See a reporting query in the order repository.
 
+## Filter in the query, not after it
+
+The predicate belongs in `WHERE`. A repository call that fetches a page and then
+narrows it in JavaScript has moved the database's job into the service, and pays
+for it three times: rows crossing the wire that are thrown away, a page ceiling
+that silently truncates the answer, and a rule now stated in two places that can
+disagree.
+
+BAD — fetches 500 organizations and 1,000 tenants to keep 6 and 9:
+
+```ts
+const orgPage = await this.organizationRepository.findAll({ page: 1, limit: 500 });
+const organizations = orgPage.organizations.filter(
+  (org) =>
+    org.isActive &&
+    (org.billingModel == null || org.billingModel === BillingModel.Commission),
+);
+
+const tenantPage = await this.tenantRepository.getAllTenants({ page: 1, limit: 1000 });
+for (const tenant of tenantPage.tenants) {
+  if (!tenant.isActive || tenant.organizationId == null) continue;
+  // …
+}
+```
+
+GOOD — a purpose-built method per question, the predicate in SQL:
+
+```ts
+const organizations = await this.organizationRepository.findBillableOrganizations();
+const tenants = await this.tenantRepository.findActiveByOrganizationIds(
+  organizations.map((org) => org.id),
+);
+```
+
+### And let it do the grouping
+
+The same instinct one level up: three reads reassembled into `Map`s in a service
+is a join written in JavaScript. Postgres nests children in one statement with
+`LEFT JOIN LATERAL` + `json_agg`, and the caller gets the shape it actually
+wants — one row per parent, children already attached.
+
+BAD — three round trips, then rebuild the relationships by hand:
+
+```ts
+const organizations = await orgRepo.findBillableOrganizations();
+const tenants = await tenantRepo.findActiveByOrganizationIds(ids);
+const integrations = await orgRepo.findConnectedIntegrationsForOrganizations(ids);
+const tenantsByOrg = new Map(); for (const t of tenants) { /* group */ }
+const integrationsByOrg = new Map(); for (const i of integrations) { /* group */ }
+```
+
+GOOD — one statement, children nested:
+
+```sql
+SELECT o.*, COALESCE(t.tenants, '[]'::json) AS tenants
+FROM organizations o
+LEFT JOIN LATERAL (
+  SELECT json_agg(json_build_object('id', tn.id, 'name', tn.name) ORDER BY tn.name) AS tenants
+  FROM tenants tn WHERE tn."organizationId" = o.id AND tn."isActive"
+) t ON TRUE
+WHERE …
+```
+
+`LEFT JOIN LATERAL … ON TRUE` keeps parents with no children (the plain join
+would drop them); `COALESCE(…, '[]'::json)` turns their `NULL` into an empty
+array so the caller never branches on it. Use `json_agg(DISTINCT jsonb_build_object(…))`
+when the child join can duplicate rows — `jsonb` because `json` has no equality
+operator for `DISTINCT`.
+
+**Raw queries bypass the column transformers.** `decimalTransformer` does not run,
+so numerics arrive as strings and `row.fee > 0` compares a string. Cast in SQL
+(`col::float8 AS "col"`) rather than coercing at every read site, and keep the
+quoted alias or Postgres lowercases the column.
+
+Two reads are not automatically wrong — separate queries are right when the
+children are optional, paginated independently, or reused across parents. The
+smell is specifically *fetch several sets, then re-derive the relationship the
+database already knows*.
+
+### Why the page limit is the tell
+
+Reaching for a generic list method forces a `limit`, and any `limit` you pick is
+either too small (the tail is silently missing) or a guess that rots. A guard
+that throws when `total > rows.length` treats the symptom: the query should
+return the set, not a page of a superset. **A magic page size in a domain
+service is almost always a filter that belongs in the query.**
+
+### The rule
+
+- One question, one repository method, named for the question — `findBillableOrganizations`, not `findAll` + a filter.
+- Scope by id when you already hold the ids: `WHERE "organizationId" = ANY($1)`, not fetch-everything-then-group.
+- Filtering **in memory is right** when the rows are already loaded for another reason, or when the predicate cannot be expressed in SQL. Deriving counts from a set you already have is not this smell.
+- Two places stating the same predicate is the real cost. When a rule (who gets invoiced, what counts as active) lives in both a query and a service filter, they drift, and the drift is silent.
+
 ## Bulk INSERT / UPDATE — `runBulkQuery`
 
-Any method that builds a multi-row `VALUES (…),(…),(…)` clause with `$N` placeholders per row must go through `this.runBulkQuery` on the base `Repository`. Postgres caps a single statement at 65535 bind parameters (uint16 wire-protocol limit); exceeding it surfaces as `bind message has N parameter formats but 0 parameters` — cryptic and only triggered under real data volumes, so unit tests won't catch it.
+**Any multi-row write** must go through the base `Repository` — whether it builds the `VALUES (…),(…),(…)` clause by hand (`runBulkQuery`) or hands an array to TypeORM (`runBulkUpsert` / `runBulkInsert`, which wrap `repository.upsert` / `repository.insert`). Postgres caps a single statement at 65535 bind parameters (uint16 wire-protocol limit); exceeding it surfaces as `bind message has N parameter formats but 0 parameters` — cryptic and only triggered under real data volumes, so unit tests won't catch it. A bare `repository.upsert(rows, …)` is the form that slips through review, because nothing in it looks like SQL.
 
 `runBulkQuery` chunks the input, fans chunks out via `Promise.allSettled`, and surfaces the first rejection after all settle. Inside `runTransaction` chunks serialize on the single connection; outside they parallelize across the pool.
 
@@ -59,7 +153,7 @@ async upsertMany(rows: Row[]): Promise<Result[]> {
 
 - Build `values` and `params` from `batch`, never the outer `rows` — placeholders and params would come from different sets and the chunk blows up.
 - For `UPDATE … RETURNING …`, wrap in a CTE + outer `SELECT` so the driver returns rows directly instead of the `[rows, count]` tuple. See a bulk `updateQuantities` method.
-- Pass `{ chunkSize: N }` when rows are wide (>60 params/row). Default is 1000; safe cap is `params/row × chunkSize < 65535`.
+- **Chunk by parameter count, not row count.** The chunk size derives from the row's real width — `runBulkQuery` builds one row to count its parameters, and `runBulkUpsert` / `runBulkInsert` read the entity's insertable column count. Pass `{ chunkSize: N }` only to go **below** that. A column added later narrows the chunk on its own.
 - Empty input is handled by the helper — no `!rows.length` guard needed.
 - Type the row param as the entity or `Partial<Entity>`, not a bespoke `XWrite` interface — see conventions.md → Write & derived types.
 

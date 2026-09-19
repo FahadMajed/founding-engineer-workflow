@@ -32,10 +32,10 @@ npm test -- --testNamePattern="should [your test name]"
 
 Name it `should [expected behavior] when [condition]`. Rerun if flaky FK/unique issues.
 
-**Skip the test — no shallow tests.** Do NOT invent a test just to have one. Skip it when:
-- The fix is straightforward and obvious (a null return, a wrong constant, a reordered check, a missing guard) — the diff is self-evidently correct.
+**Skip the test — no shallow tests.** Do NOT invent a test just to have one. Skip it when any of these hold:
+- The fix is obvious — a null return, a wrong constant, a reordered check, a missing guard, or making one code path match a convention the codebase already follows elsewhere. The diff is self-evidently correct; a test would only restate it.
 - The only way to "test" it is a change-detector: mocking the code's own dependency and asserting call counts, arguments, private methods, or "was X called with Y". That asserts the implementation, not a contract — banned (see `write-tests/SKILL.md`).
-- It's a thin adapter over an external API with no observable contract on our side — verify live against the real service instead (`/optional/local-testing`), ship without a unit test.
+- The fix lives in an external-service adapter — code that maps, parses, or normalizes a third-party payload into our internal shape. Verify it **live** against the real service (`/optional/call-api`) and ship without a unit test. A fabricated-payload unit test feeds the mapper an input you hand-wrote and checks it comes back mapped — it proves the fake matches the mapper, not that the mapper matches the third party; only the live call catches a wrong field name. **If you verified the fix live, that IS the verification — do not also add a fabricated-payload unit test.** (Domain logic that happens to sit near an adapter — attribution rules, health banding — is not payload mapping; test that normally.)
 
 When you skip, say why in the PR (one line). A shallow test is worse than no test — it locks in the implementation and rots.
 

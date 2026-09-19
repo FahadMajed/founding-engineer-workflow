@@ -34,12 +34,12 @@ BIG feature (days, API + UI)        →  /sdlc
    → plan-tests ∥ build-feature (build → test → ship, per slice)
    → wire + chrome-verify → two cross-linked PRs → register the bet
 
-MEDIUM feature (hours, API + UI)    →  /adhoc-fullstack-feature
+MEDIUM feature (hours, API + UI)    →  /scoped-fullstack-feature
    ux-discovery-lite → production frontend (mocked API) → short design doc
    → build → two-agent tests → wire + visual verify → two PRs
    (three hard checkpoints: UX, frontend, backend design)
 
-SMALL feature (hours, backend)      →  /adhoc-feature
+SMALL feature (hours, backend)      →  /scoped-feature
    understand → implement → two-agent tests → ship → PR
 ```
 
@@ -52,7 +52,7 @@ A few ideas run through all of it:
 - **You steer between phases.** The agent moves fast; you think with it at the gates — push back on the design, critique a test scenario, raise the bar on quality. The aim is fast *and* maintainable, because maintainable code is what keeps you fast.
 - **Design before code.** Big features get a real design doc, drafted section by section (schema, API, components, internals), each with a fresh-eyes review before anything is built.
 - **Tests written by someone who didn't write the code.** `/plan-tests` and `/write-tests` run as two separate agents so coverage comes from the spec, not from the implementation's blind spots.
-- **Review is a sweep of specialist agents, not one pass.** Each PR gets a panel — security, design, conventions, bug-hunter, data-migration — commenting inline against a distinct rubric. You triage; they don't merge for you.
+- **Review is a sweep of specialist agents, not one pass.** Each PR gets a panel — security, design, conventions, bug-hunter, sql-and-migration — commenting inline against a distinct rubric. You triage; they don't merge for you.
 - **A shipped feature is a bet you can grade.** Big features register their metrics + falsification lines at ship time, and `/outcome-review` scores them later — so the loop closes and you actually learn.
 
 ## Quick Start
@@ -92,8 +92,8 @@ Copy `templates/CLAUDE.template.md` to your project root as `CLAUDE.md`. Fill in
 | Skill                      | Use when                                                        |
 | -------------------------- | --------------------------------------------------------------- |
 | `/sdlc`                    | A big fullstack feature — days of work, needs a real design doc |
-| `/adhoc-fullstack-feature` | A small feature spanning API + UI — hours, not days             |
-| `/adhoc-feature`           | A small backend feature — no design doc, single PR              |
+| `/scoped-fullstack-feature` | A small feature spanning API + UI — hours, not days             |
+| `/scoped-feature`           | A small backend feature — no design doc, single PR              |
 
 ### Discovery & product
 
@@ -102,7 +102,7 @@ Copy `templates/CLAUDE.template.md` to your project root as `CLAUDE.md`. Fill in
 | `/proposal`          | Problem-first intake — interview, then a proposal that feeds a workflow |
 | `/signals`           | Mine first-party sources for problems nobody raised, tier the evidence |
 | `/ux-discovery`      | Deep UX thinking before building. Outputs a structured discovery doc |
-| `/ux-discovery-lite` | Lightweight discovery for small features                            |
+| `/ux-discovery-lite` | Same discipline at a smaller scope — for features that don't need the full run |
 | `/outcome-review`    | Grade a shipped bet against the metrics + falsification lines it predicted |
 
 ### Design
@@ -130,6 +130,7 @@ Copy `templates/CLAUDE.template.md` to your project root as `CLAUDE.md`. Fill in
 | ----------------------- | --------------------------------------------------------------- |
 | `/ship-pr`              | Draft PR → review-agent sweep (inline) → triage → mark ready     |
 | `/resolve-pr-comments`  | Triage and resolve review comments — verify, fix or push back, reply |
+| `/visual-gate`          | Render a design doc as a navigable page for the gate sign-off    |
 | `/visual-review`        | Interactive explainers + Mermaid sequence diagrams for code under review |
 | `/project-writeup`      | Document the feature factually — what, why, bugs, lessons        |
 
@@ -147,7 +148,7 @@ Copy `templates/CLAUDE.template.md` to your project root as `CLAUDE.md`. Fill in
 
 | Template              | Purpose                                  |
 | --------------------- | ---------------------------------------- |
-| `local-testing`       | Test endpoints with auto-auth            |
+| `call-api`            | Call your API with auto-auth             |
 | `debug-errors`        | Investigate production errors            |
 | `observability`       | Read-only prod triage → classify → route |
 | `task-management`     | Integrate with your task tracker         |
@@ -162,7 +163,18 @@ Copy `templates/CLAUDE.template.md` to your project root as `CLAUDE.md`. Fill in
 | `bug-hunter`              | Correctness — proves each claim with a failing test         |
 | `design-reviewer`        | Design quality — deep modules, layering, house patterns     |
 | `conventions-reviewer`   | Naming, ubiquitous language, conformance to your references  |
-| `data-migration-reviewer` | What breaks at prod data volume — only when migrations/entities change |
+| `sql-and-migration-reviewer` | Query and schema safety at prod data volume — when migrations/entities/queries change |
+| `perf-reviewer`           | Runtime cost — proves the claim with numbers, not intuition   |
+| `simplicity-challenger`   | Challenges complexity that the problem doesn't require        |
+
+Frontend work gets its own gates before the PR — a panel of sweepers, each reading one rubric:
+
+| Sweeper                | Reads                                                    |
+| ---------------------- | -------------------------------------------------------- |
+| `visual-sweeper`       | The Design Smell Quick Check, against its own screenshots |
+| `copy-sweeper`         | `frontend-build/reference/copy.md` — what the words say    |
+| `conventions-sweeper`  | The frontend conventions references (`code-map.md` routes) |
+| `perf-sweeper`         | `frontend-build/reference/perf.md` — runtime cost, measured |
 
 Plus `code-explorer` (find patterns to match before building) and `qa-reviewer` (test-scenario coverage). Copy them all to `.claude/agents/`.
 
@@ -172,15 +184,16 @@ Plus `code-explorer` (find patterns to match before building) and `qa-reviewer` 
 your-project/
 ├── .claude/
 │   ├── skills/
-│   │   ├── sdlc/  adhoc-feature/  adhoc-fullstack-feature/
+│   │   ├── sdlc/  scoped-feature/  scoped-fullstack-feature/
 │   │   ├── proposal/  ux-discovery/  signals/  outcome-review/
-│   │   ├── design-schema/  design-api/  design-components/
+│   │   ├── design-schema/  design-api/  design-components/  design-internals/
+│   │   ├── visual-gate/  visual-review/
 │   │   ├── build-feature/references/      # your backend patterns
 │   │   ├── write-tests/references/        # your test patterns
 │   │   ├── ship-pr/references/            # PR-stack rules, review rubrics
-│   │   ├── frontend-build/reference/      # design-smell guides, shadcn-first
+│   │   ├── frontend-build/reference/      # smells, code-map, house conventions
 │   │   └── ...
-│   └── agents/                            # the review-sweep panel
+│   └── agents/                            # review-sweep panel + frontend sweepers
 ├── docs/
 │   ├── standards/
 │   │   ├── DESIGN_DOC_METHOD.md

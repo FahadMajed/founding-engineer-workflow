@@ -17,6 +17,8 @@ Naming, params, DTOs, async fan-out, errors, docs. Read in full — these apply 
   - Sync/event work-units → `items` (`SyncResult` counts, event payloads). Note: a paginated HTTP response still keys on the resource name, not `items` (see Pagination).
   - **Element type mirrors the role**: `rows: XRow[]`, `updates: XUpdate[]`, `items: XItem[]`, a domain event's payload element → `{Domain}ChangedItem`. No one-off suffixes (`XWrite`) — derive from the entity instead (`Omit<Entity, 'id'>`).
 
+- **Vendor names stay at the edge** — a third party's name belongs on the enum value, the adapter that speaks its protocol (`{{Vendor}}Warehouse`), and the user-facing label. Never on a route path, DTO, service method, column, or capability member: `POST /warehouses/discovery` taking `provider` and `DiscoverWarehouseRequest`, not `POST /warehouses/{{vendor}}/discovery` and `Discover{{Vendor}}HubsRequest`. The test is whether a second vendor of the same kind could reuse the surface unchanged. Full rule + the shared-code branching it generalizes to: [../../ship-pr/references/naming-and-language.md](../../ship-pr/references/naming-and-language.md).
+
 ## Named parameters
 
 **Two or more args → one named object. Never positional.** A single arg can stay positional.
@@ -94,7 +96,13 @@ Anchor: an order-syncing service — per-account `allSettled` fan-out with neste
 
 ## Errors
 
-Throw standard Nest exceptions (`NotFoundException`, `BadRequestException`, …) — no custom exception classes. The global `AllExceptionsFilter` shapes them into `{ statusCode, message, path }`. Reuse user-facing message constants from a shared `error-messages` file. **Don't log in services**; the filter logs.
+Throw standard Nest exceptions (`NotFoundException`, `BadRequestException`, …). The global `AllExceptionsFilter` shapes them into `{ statusCode, message, path }`. Reuse user-facing message constants from a shared `error-messages` file. **Don't log in services**; the filter logs.
+
+Messages are **localized pairs**, not bare strings: one entry per language you serve, resolved with `localized()` at the point you throw, since the caller's language is only known inside their request. The product's primary language is the default for a caller that asks for nothing.
+
+One exception to "standard exceptions only", and only one: a **domain failure the person in the flow can act on**, where the client wants to word it in its own voice. Those carry a stable code alongside the message, thrown through a small per-domain error class. **The code's value is camelCase, because the client uses it directly as an i18n key** — `signInRejected`, not `INTEGRATION_SIGN_IN_REJECTED`, which would force a hand-written map that goes stale silently. That is the *only* sanctioned custom exception class — everything else stays a standard Nest exception. Shape, boundary, and what disqualifies a code: [domain-errors.md](domain-errors.md).
+
+An error thrown inside a queued handler also carries a **retry verdict**, and wrapping one throws that verdict away: [queue-error-verdicts.md](queue-error-verdicts.md).
 
 ## JSDoc
 

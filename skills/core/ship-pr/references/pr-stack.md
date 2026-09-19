@@ -52,8 +52,22 @@ Every PR body's **Stack** section carries the map: the design doc link, the orde
 - Create: `gh pr create --draft --base claude/{feature}/{n-1}-{use-case}`
 - Review sweep runs per PR on `git diff {base}...HEAD` — never on the whole stack at once.
 - A fix on PR n → rebase every branch above it (bottom-up) and `git push --force-with-lease` each.
-- After the bottom PR merges: `gh pr edit {next PR} --base {default branch}`, rebase the remaining stack onto the default branch, force-push with lease.
+
+### After the bottom PR merges — check how it merged first
+
+Only a squash or rebase merge needs anything done. A true merge leaves the base branch's commits as ancestors of the default branch, so the stacked branch is *already* based on it and its diff is already correct:
+
+```bash
+git fetch origin
+git merge-base --is-ancestor origin/{base-branch} origin/{default} \
+  && echo "true merge → retarget only" || echo "squash/rebase → rebase needed"
+```
+
+- **True merge** — retarget and stop: `gh pr edit {next PR} --base {default branch}` (GitHub does this itself if the base branch was deleted). Do **not** rebase. New work pushes as a fast-forward.
+- **Squash or rebase merge** — the SHAs were rewritten, so the stacked branch still carries the original commits and its diff would show them twice. Rebase onto the default branch and `git push --force-with-lease`.
+
+**Rebasing when you didn't need to is not harmless.** It diverges the branch from its remote, so the next push needs `--force`, and force-push may be blocked by branch policy — at which point a no-op turns into a new branch, a new PR, and a closed one to explain. Run the check; don't reach for the rebase reflexively.
 
 ## When NOT to stack
 
-The feature is one use case that fits review comfortably → one PR. A stack of one is the normal case for adhoc work. Don't slice for the sake of slicing.
+The feature is one use case that fits review comfortably → one PR. A stack of one is the normal case for scoped work. Don't slice for the sake of slicing.

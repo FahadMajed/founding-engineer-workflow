@@ -2,6 +2,10 @@
 
 Written last, composed from the artifacts. Each section carries an **un-fakeable field** — something that cannot be filled without the underlying thinking. Scannable; conceptual UI descriptions; no ASCII mockups.
 
+**Altitude rule — this holds for provenance too.** Evidence is cited at the system level, never at the implementation level: no endpoint paths, table or column names, enum values, token internals, or code identifiers anywhere in a discovery doc — including inside tier stamps, edge cases, and design decisions, where they leak in dressed as rigor. Verification detail that engineering needs lives in the design doc; the discovery doc names the source and date only.
+- BAD: "the pool shows one record at −2 (prod `products.total_available_quantity`, 2026-08-25); account health reads it via `product_inventory_planning`; sign-in is `POST /api/v2/users/login {username, password}`."
+- GOOD: "the pool shows one record at −2 (production database read, 2026-08-25); account health computes from the same number; sign-in was verified live to accept a plain username/password."
+
 The document opens with a four-line **Consumers block**, so each downstream reader lands on its sections instead of skimming from the top:
 
 ```

@@ -1,19 +1,23 @@
 ---
 name: debug-errors
-description: Debug production HTTP errors (400, 500, or both). Fetches grouped errors from logs, shows counts, then investigates. Use when debugging API failures or reviewing recent server errors.
+description: Debug production errors — request errors (400/500) and background errors from crons, event handlers and services. Fetches grouped errors from logs, shows counts, then investigates. Use when debugging API failures or reviewing recent server errors.
 ---
 
-# Debug HTTP Errors
+# Debug Production Errors
 
 Fetch production errors, group by type, investigate, and suggest fixes.
 
 ## Usage
 
 User can specify:
-- `500` - server errors only
-- `400` - client errors only
-- `both` or `all` - both 400 and 500 errors
-- Default: 500 if not specified
+- Default (no argument) — every logged error, whatever its status
+- `500` — server errors only
+- `400` — client errors only
+- `both` — 400 and 500 together
+
+**Only errors thrown inside an HTTP request carry a status.** A cron, an event handler, or a background service has no request in scope, so its errors carry none — and a `500`/`400` sweep cannot see them. Those are routinely the loudest breaks in a system. Start from the default sweep, which filters on nothing but "an error is present", and use the status modes to narrow once you know what you're chasing.
+
+Tag every grouped row with its status — `[500]`, `[404]`, or `[background]` for a row with no status. A tall `[background]` row is a silent recurring break, not noise.
 
 ## Log Source Setup
 
@@ -58,11 +62,22 @@ Scripts default to **grouped/unique view** to reduce output noise.
 ## Output Format
 
 Grouped view shows:
-- Error message
+- Status tag — `[500]`, `[404]`, `[background]`
+- Error message, truncated
 - Count (how many times it occurred)
 - First seen / Last seen timestamps
 
 This helps prioritize high-frequency errors first.
+
+## Drill Down
+
+The grouped message is truncated and drops everything around it, so a signature like `Failed to sync for account 1632:` tells you nothing about the cause. Filtering on a substring of the error returns the whole log record — full error text, the message it was logged under, context fields (ids), and the stack when there is one. It works the same for background errors, which usually carry context fields instead of a trace.
+
+```bash
+{{YOUR_FILTER_SCRIPT}} "error substring" --limit 3
+```
+
+**Group by trace shape before counting findings.** One shared trace signature (an aggregate error wrapping the same HTTP-client and socket frames) across several unrelated accounts is one network blip, not N separate breaks.
 
 ## DB Investigation (if applicable)
 

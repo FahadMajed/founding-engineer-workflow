@@ -1,6 +1,6 @@
 # Posting Review Findings as Inline PR Comments
 
-Every review agent posts its own findings on the PR. Prefix every comment body with your agent tag: `**[security]**`, `**[design]**`, `**[conventions]**`, `**[bug-hunter]**`, `**[data-migration]**`.
+Every review agent posts its own findings on the PR. Prefix every comment body with your agent tag: `**[security]**`, `**[design]**`, `**[conventions]**`, `**[bug-hunter]**`, `**[sql-and-migration]**`, `**[perf]**`, `**[simplicity]**`.
 
 ## One review per agent, all comments in one call
 
